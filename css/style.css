@@ -28,8 +28,8 @@ img,video{max-width:100%;border-radius:var(--radius-sm)}
 @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
 @keyframes ripple{0%{transform:scale(0);opacity:1}100%{transform:scale(2);opacity:0}}
 /* === 星空背景 === */
-#starfield-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
-#cursor-glow{position:fixed;pointer-events:none;z-index:9999;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(100,140,255,0.06) 0%,transparent 70%);transform:translate(-50%,-50%);transition:opacity 0.3s}
+#starfield-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;pointer-events:none}
+#cursor-glow{position:fixed;pointer-events:none;z-index:-1;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(100,140,255,0.06) 0%,transparent 70%);transform:translate(-50%,-50%);transition:opacity 0.3s}
 
 /* === 主布局 === */
 
@@ -133,7 +133,7 @@ img,video{max-width:100%;border-radius:var(--radius-sm)}
 .tag:hover{background:rgba(0,229,255,0.2);border-color:var(--cyan)}
 
 /* === 星系UI层 === */
-#galaxy-ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none}
+#galaxy-ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none}
 #galaxy-ui>*{pointer-events:auto}
 
 /* 星系中心按钮 */
@@ -166,22 +166,20 @@ img,video{max-width:100%;border-radius:var(--radius-sm)}
 .galaxy-logout:hover{border-color:rgba(255,100,120,0.5);box-shadow:0 0 30px rgba(255,100,120,0.3)}
 
 /* 页面内容覆盖层 */
-#app-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:30;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;padding-top:15vh}
+#app-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:20;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;padding-top:15vh}
 #app-overlay>*{pointer-events:auto}
-#app-container{width:min(90vw,700px);max-height:75vh;overflow-y:auto;background:rgba(8,12,32,0.92);
-  backdrop-filter:blur(20px);border:1px solid rgba(100,150,255,0.15);border-radius:20px;
-  padding:28px 32px;color:var(--text);animation:fadeIn 0.4s ease-out}
+#app-container{width:min(90vw,700px);max-height:75vh;overflow-y:auto;background:rgba(8,12,32,0.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(100,150,255,0.15);border-radius:20px;padding:28px 32px;color:var(--text);animation:fadeIn 0.4s ease-out}
 
 @keyframes fadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
 
 @media(max-width:768px){
   .galaxy-ring-btn{top:calc(50% + sin(var(--ring-angle)) * 30vh);left:calc(50% + cos(var(--ring-angle)) * 30vw);padding:8px 16px;font-size:0.78em}
   .galaxy-center-btn{padding:12px 24px;font-size:0.95em}
-  #app-container{width:94vw;padding:18px 16px;max-height:70vh}
+  #app-container{width:min(90vw,700px);max-height:75vh;overflow-y:auto;background:rgba(8,12,32,0.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(100,150,255,0.15);border-radius:20px;padding:28px 32px;color:var(--text);animation:fadeIn 0.4s ease-out}
 }
 
 /* === 星系UI层 === */
-#galaxy-ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none}
+#galaxy-ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none}
 #galaxy-ui>*{pointer-events:auto}
 
 /* 星系中心按钮 */
@@ -217,17 +215,23 @@ img,video{max-width:100%;border-radius:var(--radius-sm)}
 .galaxy-logout:hover{border-color:rgba(255,100,120,0.45);box-shadow:0 0 30px rgba(255,100,120,0.25)}
 
 /* 页面内容覆盖层 */
-#app-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:30;pointer-events:none;
-  display:flex;align-items:flex-start;justify-content:center;padding-top:15vh}
+#app-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:20;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;padding-top:15vh}
 #app-overlay>*{pointer-events:auto}
-#app-container{width:min(90vw,700px);max-height:75vh;overflow-y:auto;background:rgba(8,12,32,0.92);
-  backdrop-filter:blur(20px);border:1px solid rgba(100,150,255,0.15);border-radius:20px;
-  padding:28px 32px;color:var(--text);animation:fadeIn 0.4s ease-out}
+#app-container{width:min(90vw,700px);max-height:75vh;overflow-y:auto;background:rgba(8,12,32,0.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(100,150,255,0.15);border-radius:20px;padding:28px 32px;color:var(--text);animation:fadeIn 0.4s ease-out}
 
 @keyframes fadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
 
 @media(max-width:768px){
   .galaxy-ring-btn{padding:8px 16px;font-size:0.76em}
   .galaxy-center-btn{padding:14px 28px;font-size:1em}
-  #app-container{width:94vw;padding:18px 16px;max-height:70vh}
+  #app-container{width:min(90vw,700px);max-height:75vh;overflow-y:auto;background:rgba(8,12,32,0.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(100,150,255,0.15);border-radius:20px;padding:28px 32px;color:var(--text);animation:fadeIn 0.4s ease-out}
 }
+
+/* === 按钮辉光（匹配银河蓝紫） === */
+.galaxy-center-btn{box-shadow:0 0 30px rgba(80,140,255,0.25)}
+.galaxy-ring-btn:hover{box-shadow:0 0 25px rgba(100,140,255,0.3)}
+
+/* === 全局UI半透明约束（保留底层银河可视度） === */
+#app-overlay>*{pointer-events:auto}
+#app-container .glass-panel{background:rgba(10,16,40,0.8)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important}
+.modal-overlay{background:rgba(2,4,16,0.75)!important;backdrop-filter:blur(8px)!important}
