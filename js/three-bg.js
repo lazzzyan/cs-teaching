@@ -457,10 +457,7 @@ class StarfieldEngine {
     const haloPts = this.scene.getObjectByName("coreHaloPts");
     if (haloPts) haloPts.rotation.y += dt * 0.04;
 
-    if (!this.isTransitioning) {
-      this.camera.position.x += (this.mouseNdc.x * 2.5 - this.camera.position.x + this.camTarget.x) * 0.01;
-      this.camera.position.y += (this.mouseNdc.y * 1.5 - this.camera.position.y + this.camTarget.y) * 0.01;
-    }
+    // 星系固定在中央，不跟随鼠标移动
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -469,3 +466,5 @@ class StarfieldEngine {
 }
 
 window.StarfieldEngine = StarfieldEngine;
+
+

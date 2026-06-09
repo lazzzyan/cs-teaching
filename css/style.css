@@ -179,3 +179,55 @@ img,video{max-width:100%;border-radius:var(--radius-sm)}
   .galaxy-center-btn{padding:12px 24px;font-size:0.95em}
   #app-container{width:94vw;padding:18px 16px;max-height:70vh}
 }
+
+/* === 星系UI层 === */
+#galaxy-ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none}
+#galaxy-ui>*{pointer-events:auto}
+
+/* 星系中心按钮 */
+.galaxy-center-btn{
+  padding:16px 36px;border:1px solid rgba(160,200,255,0.4);border-radius:50px;
+  background:rgba(12,18,45,0.8);color:#fff;font-size:1.15em;font-weight:500;
+  letter-spacing:0.06em;cursor:pointer;backdrop-filter:blur(18px);
+  transition:all 0.4s;display:flex;align-items:center;gap:10px;
+  box-shadow:0 0 30px rgba(80,140,255,0.25)}
+.galaxy-center-btn:hover{
+  background:rgba(22,32,90,0.88);border-color:rgba(180,220,255,0.6);
+  box-shadow:0 0 50px rgba(100,160,255,0.5),0 0 100px rgba(80,120,255,0.25);
+  transform:translate(-50%,-50%) scale(1.06)}
+.gcb-icon{font-size:1.3em}
+.gcb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5588ee,#9944dd);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9em;color:#fff;
+  box-shadow:0 0 15px rgba(100,150,255,0.4)}
+.gcb-label{font-size:0.95em;opacity:0.9}
+
+/* 星系环按钮 */
+.galaxy-ring-btn{
+  padding:10px 22px;border:1px solid rgba(140,180,255,0.2);border-radius:28px;
+  background:rgba(10,15,40,0.6);color:rgba(255,255,255,0.75);
+  font-size:0.88em;cursor:pointer;backdrop-filter:blur(12px);
+  transition:all 0.35s;display:flex;align-items:center;gap:8px;
+  white-space:nowrap;letter-spacing:0.04em}
+.galaxy-ring-btn:hover{
+  border-color:rgba(160,200,255,0.5);background:rgba(20,30,80,0.78);
+  color:#fff;box-shadow:0 0 30px rgba(100,150,255,0.35)}
+.grb-icon{font-size:1.1em}
+.grb-label{font-size:0.85em}
+.galaxy-logout{border-color:rgba(255,100,120,0.2)}
+.galaxy-logout:hover{border-color:rgba(255,100,120,0.45);box-shadow:0 0 30px rgba(255,100,120,0.25)}
+
+/* 页面内容覆盖层 */
+#app-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:30;pointer-events:none;
+  display:flex;align-items:flex-start;justify-content:center;padding-top:15vh}
+#app-overlay>*{pointer-events:auto}
+#app-container{width:min(90vw,700px);max-height:75vh;overflow-y:auto;background:rgba(8,12,32,0.92);
+  backdrop-filter:blur(20px);border:1px solid rgba(100,150,255,0.15);border-radius:20px;
+  padding:28px 32px;color:var(--text);animation:fadeIn 0.4s ease-out}
+
+@keyframes fadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  .galaxy-ring-btn{padding:8px 16px;font-size:0.76em}
+  .galaxy-center-btn{padding:14px 28px;font-size:1em}
+  #app-container{width:94vw;padding:18px 16px;max-height:70vh}
+}
