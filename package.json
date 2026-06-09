@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "netlify-cli": "^26.1.0",
+    "surge": "^0.27.4",
+    "vercel": "^54.9.1",
+    "wrangler": "^4.98.0"
+  }
+}

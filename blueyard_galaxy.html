@@ -1,0 +1,592 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blue Yard - 3D Galaxy</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+#ui-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none}
+#ui-overlay>*{pointer-events:auto}
+.sector-text{position:absolute;color:rgba(255,255,255,0.85);font-weight:300;letter-spacing:0.08em;cursor:pointer;transition:color .4s,text-shadow .4s,transform .4s;user-select:none;text-shadow:0 0 10px rgba(120,140,255,0.3)}
+.sector-text:hover{color:#fff;text-shadow:0 0 25px rgba(140,160,255,0.9),0 0 50px rgba(100,120,255,0.5);transform:scale(1.05)}
+.sector-text.active{color:#fff;text-shadow:0 0 30px rgba(160,200,255,1),0 0 60px rgba(120,160,255,0.7)}
+#sector-biology{top:8%;left:5%;font-size:clamp(1.2rem,3vw,2.2rem)}
+#sector-web3{top:8%;right:5%;font-size:clamp(1.2rem,3vw,2.2rem)}
+#sector-comp{bottom:18%;left:5%;font-size:clamp(0.9rem,2.2vw,1.5rem)}
+#sector-knowledge{bottom:18%;right:5%;font-size:clamp(0.9rem,2.2vw,1.8rem)}
+#bottom-nav{position:absolute;bottom:3%;left:50%;transform:translateX(-50%);display:flex;gap:clamp(8px,2vw,16px);z-index:20}
+.nav-btn{padding:8px 18px;border:1px solid rgba(255,255,255,0.25);border-radius:24px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7);font-size:clamp(11px,1.2vw,14px);cursor:pointer;letter-spacing:.04em;backdrop-filter:blur(10px);transition:all .35s;white-space:nowrap}
+.nav-btn:hover,.nav-btn.active{background:rgba(140,160,255,0.2);border-color:rgba(160,200,255,0.5);color:#fff;box-shadow:0 0 20px rgba(100,140,255,0.3)}
+#logo-carousel-wrap{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:min(85vw,700px);overflow:hidden;z-index:15}
+#logo-carousel-track{display:flex;gap:40px;animation:scroll-logos 20s linear infinite}
+#logo-carousel-wrap:hover #logo-carousel-track{animation-play-state:paused}
+@keyframes scroll-logos{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.logo-item{flex-shrink:0;color:rgba(255,255,255,0.5);font-size:13px;letter-spacing:.06em;white-space:nowrap;transition:color .3s}
+.logo-item:hover{color:rgba(255,255,255,0.9)}
+#decor-svg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none}
+@media(max-width:768px){.sector-text{font-size:clamp(1rem,5vw,1.5rem)!important}#sector-comp,#sector-knowledge{bottom:24%}#logo-carousel-wrap{bottom:18%}#bottom-nav{bottom:4%}.nav-btn{padding:6px 12px;font-size:11px}}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<svg id="decor-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+<g opacity="0.12" stroke="#8aa4ff" fill="none" stroke-width="0.15">
+<path d="M10,20 C25,0 25,40 10,20"/><path d="M10,20 C-5,0 -5,40 10,20"/>
+<path d="M90,20 C75,0 75,40 90,20"/><path d="M90,20 C105,0 105,40 90,20"/>
+<polygon points="15,85 50,70 50,95" opacity="0.08" stroke="#6af"/>
+<polygon points="85,85 50,70 50,95" opacity="0.08" stroke="#a6f"/>
+<line x1="50" y1="70" x2="50" y2="95" stroke-width="0.08" stroke="#88c8ff"/>
+<line x1="15" y1="85" x2="85" y2="85" stroke-width="0.08" stroke="#88c8ff"/>
+</g>
+</svg>
+<div id="ui-overlay">
+<div class="sector-text" id="sector-biology" data-sector="biology">BIOLOGY</div>
+<div class="sector-text" id="sector-web3" data-sector="web3">WEB3</div>
+<div class="sector-text" id="sector-comp" data-sector="comp">COMPUTATION & ENGINEERING</div>
+<div class="sector-text" id="sector-knowledge" data-sector="knowledge">KNOWLEDGE & DATA</div>
+<div id="logo-carousel-wrap"><div id="logo-carousel-track"></div></div>
+<div id="bottom-nav">
+<button class="nav-btn active" data-scene="galaxy">Home</button>
+<button class="nav-btn" data-scene="biology">DNA</button>
+<button class="nav-btn" data-scene="web3">Web3</button>
+<button class="nav-btn" data-scene="comp">Engineering</button>
+<button class="nav-btn" data-scene="knowledge">Data</button>
+</div>
+</div>
+<script type="module">
+
+// ==================== 依赖导入 ====================
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+// ==================== 全局状态 ====================
+const STATE = {
+  mouse: new THREE.Vector2(9999, 9999),
+  mouseWorld: new THREE.Vector3(9999, 0, 9999),
+  mouseNdc: new THREE.Vector2(0, 0),
+  activeScene: "galaxy",
+  hoveredSector: null,
+  transitioning: false,
+  clock: new THREE.Clock(),
+};
+
+// ==================== 场景初始化 ====================
+const canvas = document.getElementById("bg-canvas");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.5, 200);
+camera.position.set(0, 22, 28);
+camera.lookAt(0, 0, 0);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 5;
+controls.maxDistance = 60;
+controls.maxPolarAngle = Math.PI * 0.65;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.15;
+controls.target.set(0, 0, 0);
+controls.update();
+
+scene.add(new THREE.AmbientLight(0x111122, 0.5));
+
+// ==================== 粒子发光纹理（Canvas生成） ====================
+function createGlowTexture(inner, outer, size = 128) {
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, inner); g.addColorStop(0.15, inner);
+  g.addColorStop(0.5, outer); g.addColorStop(1, "transparent");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(c);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const glowTexBlue = createGlowTexture("rgba(180,210,255,1)", "rgba(60,100,220,0.6)");
+const glowTexPurple = createGlowTexture("rgba(200,160,255,1)", "rgba(100,40,200,0.6)");
+const glowTexWhite = createGlowTexture("rgba(255,255,255,1)", "rgba(100,140,255,0.5)");
+
+// ==================== 高斯随机数 ====================
+function gauss() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+
+// ==================== 自定义ShaderMaterial：星系粒子着色器（GPU黑洞引力） ====================
+const galaxyVert = `
+  attribute vec3 aOriginalPos;
+  attribute float aSize;
+  attribute vec3 aColor;
+  attribute float aQuadrant;
+
+  uniform vec3 uMouseWorld;
+  uniform float uMouseStrength;
+  uniform float uGlobalBrightness;
+  uniform vec4 uSectorBrightness;
+  uniform float uTime;
+  uniform float uPixelRatio;
+
+  varying vec3 vColor;
+  varying float vAlpha;
+
+  void main() {
+    vec3 pos = aOriginalPos;
+
+    // 微弱流动扰动
+    float flowX = sin(pos.z * 0.3 + uTime * 0.4) * 0.15;
+    float flowZ = cos(pos.x * 0.3 + uTime * 0.4) * 0.15;
+    pos.x += flowX; pos.z += flowZ;
+
+    // 黑洞引力：粒子被拉向鼠标位置
+    vec3 toMouse = uMouseWorld - pos;
+    float distToMouse = length(toMouse);
+    float gravity = uMouseStrength / (1.0 + distToMouse * distToMouse * 0.004);
+    pos += normalize(toMouse) * gravity;
+
+    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+
+    // 粒子大小：近大远小 + 引力区放大
+    float size = aSize * (180.0 / -mvPosition.z) * uPixelRatio;
+    size *= (1.0 + gravity * 1.5);
+
+    // 鼠标在中心时全量高亮
+    float centerDist = length(uMouseWorld);
+    float centerBoost = 1.0 - smoothstep(0.0, 5.0, centerDist);
+    size *= (1.0 + centerBoost * 2.0);
+
+    gl_PointSize = clamp(size, 0.5, 35.0);
+    gl_Position = projectionMatrix * mvPosition;
+
+    // 象限亮度控制（4板块悬停效果）
+    float sectorBoost = 1.0;
+    if (aQuadrant < 0.5) sectorBoost = uSectorBrightness.r;
+    else if (aQuadrant < 1.5) sectorBoost = uSectorBrightness.g;
+    else if (aQuadrant < 2.5) sectorBoost = uSectorBrightness.b;
+    else sectorBoost = uSectorBrightness.a;
+
+    float bright = uGlobalBrightness * sectorBoost * (1.0 + centerBoost * 2.0 + gravity * 0.5);
+    vColor = aColor * bright;
+    vAlpha = 0.75 * sectorBoost * (1.0 + centerBoost);
+  }
+`;
+
+const galaxyFrag = `
+  varying vec3 vColor;
+  varying float vAlpha;
+
+  void main() {
+    float d = length(gl_PointCoord - 0.5) * 2.0;
+    float alpha = 1.0 - smoothstep(0.0, 1.0, d);
+    alpha = pow(alpha, 1.3);
+    float glow = exp(-d * 2.5) * 0.35;
+    gl_FragColor = vec4(vColor * (1.0 + glow), vAlpha * alpha);
+  }
+`;
+
+
+// ==================== 螺旋星系粒子系统构建 ====================
+let galaxyPoints, galaxyUniforms;
+
+function buildGalaxy() {
+  const ARMS = 5, PER_ARM = 2000, R_MIN = 2, R_MAX = 18, SPREAD = 0.45;
+  const CORE = 1000, RINGS = 3, PER_RING = 600, BG = 1500;
+  const total = ARMS * PER_ARM + CORE + RINGS * PER_RING + BG;
+
+  const posArr = new Float32Array(total * 3);
+  const origArr = new Float32Array(total * 3);
+  const sizeArr = new Float32Array(total);
+  const colArr = new Float32Array(total * 3);
+  const quadArr = new Float32Array(total);
+
+  let idx = 0;
+  const innerC = new THREE.Color("#5588ff"), midC = new THREE.Color("#8855ee"), outerC = new THREE.Color("#5533aa");
+
+  function add(x, y, z, size, color, quad) {
+    const i3 = idx * 3;
+    posArr[i3] = origArr[i3] = x;
+    posArr[i3 + 1] = origArr[i3 + 1] = y;
+    posArr[i3 + 2] = origArr[i3 + 2] = z;
+    sizeArr[idx] = size;
+    colArr[i3] = color.r; colArr[i3 + 1] = color.g; colArr[i3 + 2] = color.b;
+    quadArr[idx] = quad;
+    idx++;
+  }
+
+  function quadrant(x, z) {
+    const a = Math.atan2(z, x) + Math.PI;
+    return Math.floor(a / (Math.PI * 0.5));
+  }
+
+  // 螺旋臂
+  for (let arm = 0; arm < ARMS; arm++) {
+    const armAngle = (arm / ARMS) * Math.PI * 2;
+    for (let i = 0; i < PER_ARM; i++) {
+      const t = i / PER_ARM;
+      const r = R_MIN + t * (R_MAX - R_MIN);
+      const sa = armAngle + t * Math.PI * 2.5;
+      const spread = (Math.random() - 0.5) * SPREAD * (0.3 + t * 0.7);
+      const angle = sa + spread;
+      const x = Math.cos(angle) * r, z = Math.sin(angle) * r;
+      const y = (Math.random() - 0.5) * 0.6 * (1 - t * 0.7);
+      const tc = t * 0.7 + Math.random() * 0.3;
+      const color = tc < 0.3 ? innerC.clone().lerp(midC, tc / 0.3) : midC.clone().lerp(outerC, (tc - 0.3) / 0.7);
+      add(x, y, z, 0.5 + Math.random() * 1.5 * (1 - t * 0.6), color, quadrant(x, z));
+    }
+  }
+
+  // 中心核心
+  for (let i = 0; i < CORE; i++) {
+    const a = Math.random() * Math.PI * 2, r = Math.abs(gauss() * 2.5);
+    add(Math.cos(a) * r, (Math.random() - 0.5) * 0.4, Math.sin(a) * r,
+      0.3 + Math.random() * 1.2, innerC.clone().lerp(new THREE.Color("#aaccff"), Math.random() * 0.5), quadrant(Math.cos(a) * r, Math.sin(a) * r));
+  }
+
+  // 轨道环
+  for (let ring = 0; ring < RINGS; ring++) {
+    const rr = 6 + ring * 4.5, ry = (ring - 1) * 0.3;
+    for (let i = 0; i < PER_RING; i++) {
+      const a = (i / PER_RING) * Math.PI * 2 + (Math.random() - 0.5) * 0.15;
+      const r = rr + (Math.random() - 0.5) * 0.8;
+      const x = Math.cos(a) * r, z = Math.sin(a) * r;
+      const y = ry + (Math.random() - 0.5) * 0.25;
+      add(x, y, z, 0.3 + Math.random() * 0.5, ring === 0 ? innerC : ring === 1 ? midC : outerC, quadrant(x, z));
+    }
+  }
+
+  // 背景星场
+  for (let i = 0; i < BG; i++) {
+    const a = Math.random() * Math.PI * 2, r = 15 + Math.random() * 20;
+    const x = Math.cos(a) * r + (Math.random() - 0.5) * 30;
+    const z = Math.sin(a) * r + (Math.random() - 0.5) * 30;
+    const y = (Math.random() - 0.5) * 8;
+    const dim = 0.2 + Math.random() * 0.3;
+    add(x, y, z, 0.15 + Math.random() * 0.2, new THREE.Color(dim * 0.6, dim * 0.7, dim), quadrant(x, z));
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(posArr, 3));
+  geo.setAttribute("aOriginalPos", new THREE.BufferAttribute(origArr, 3));
+  geo.setAttribute("aSize", new THREE.BufferAttribute(sizeArr, 1));
+  geo.setAttribute("aColor", new THREE.BufferAttribute(colArr, 3));
+  geo.setAttribute("aQuadrant", new THREE.BufferAttribute(quadArr, 1));
+
+  galaxyUniforms = {
+    uMouseWorld: { value: new THREE.Vector3(9999, 0, 9999) },
+    uMouseStrength: { value: 0 },
+    uGlobalBrightness: { value: 1.0 },
+    uSectorBrightness: { value: new THREE.Vector4(1, 1, 1, 1) },
+    uTime: { value: 0 },
+    uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+  };
+
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: galaxyVert, fragmentShader: galaxyFrag,
+    uniforms: galaxyUniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+
+  galaxyPoints = new THREE.Points(geo, mat);
+  scene.add(galaxyPoints);
+  console.log("Galaxy: " + total + " particles");
+  return total;
+}
+
+
+// ==================== 4大主题场景 ====================
+const themeGroups = {};
+
+// --- BIOLOGY: DNA双螺旋 ---
+function createDNA() {
+  const g = new THREE.Group();
+  const n = 800, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const t = (i / n) * Math.PI * 4, r = 1.5, s = i % 2 === 0 ? 1 : -1;
+    pos[i * 3] = Math.cos(t) * r * s;
+    pos[i * 3 + 1] = (t / (Math.PI * 4) - 0.5) * 10;
+    pos[i * 3 + 2] = Math.sin(t) * r * s;
+    const c = new THREE.Color().setHSL(0.55 + Math.random() * 0.15, 0.7, 0.5 + Math.random() * 0.3);
+    col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 0.2, map: glowTexBlue, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true
+  }));
+  g.add(pts);
+
+  // DNA横档连接线
+  for (let i = 0; i < 40; i++) {
+    const t = (i / 40) * Math.PI * 4, y = (t / (Math.PI * 4) - 0.5) * 10, r = 1.5;
+    const lineGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-Math.cos(t) * r, y, -Math.sin(t) * r),
+      new THREE.Vector3(Math.cos(t) * r, y, Math.sin(t) * r)
+    ]);
+    g.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.3 })));
+  }
+  g.visible = false; g.position.set(0, 0, -10); scene.add(g);
+  return g;
+}
+
+// --- WEB3: 网络拓扑图 ---
+function createWeb3() {
+  const g = new THREE.Group();
+  const nodes = [], nCount = 200;
+  for (let i = 0; i < nCount; i++) {
+    const a = Math.random() * Math.PI * 2, r = 2 + Math.random() * 6;
+    nodes.push(new THREE.Vector3(Math.cos(a) * r, (Math.random() - 0.5) * 6, Math.sin(a) * r));
+  }
+  const pos = new Float32Array(nCount * 3);
+  nodes.forEach((n, i) => { pos[i * 3] = n.x; pos[i * 3 + 1] = n.y; pos[i * 3 + 2] = n.z; });
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.add(new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 0.18, map: glowTexPurple, color: 0xaabbff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true
+  })));
+  // 连接线
+  for (let i = 0; i < nCount; i++) {
+    for (let j = i + 1; j < nCount; j++) {
+      if (nodes[i].distanceTo(nodes[j]) < 2.0 && Math.random() < 0.15) {
+        const lg = new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]);
+        g.add(new THREE.Line(lg, new THREE.LineBasicMaterial({ color: 0x7766cc, transparent: true, opacity: 0.2 })));
+      }
+    }
+  }
+  g.visible = false; g.position.set(10, 2, -8); scene.add(g);
+  return g;
+}
+
+// --- COMPUTATION & ENGINEERING: 几何线框 ---
+function createComp() {
+  const g = new THREE.Group();
+  const ico = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.5, 1)),
+    new THREE.LineBasicMaterial({ color: 0x6688cc, transparent: true, opacity: 0.5 }));
+  g.add(ico);
+  const torus = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.TorusGeometry(3, 0.08, 16, 64)),
+    new THREE.LineBasicMaterial({ color: 0x8866dd, transparent: true, opacity: 0.4 }));
+  torus.rotation.x = Math.PI * 0.5; g.add(torus);
+  // 轨道粒子
+  const orbN = 500, orbPos = new Float32Array(orbN * 3);
+  for (let i = 0; i < orbN; i++) {
+    const a = (i / orbN) * Math.PI * 2, r = 3.5 + Math.sin(i * 0.5) * 0.5;
+    orbPos[i * 3] = Math.cos(a) * r; orbPos[i * 3 + 1] = (Math.random() - 0.5) * 0.3; orbPos[i * 3 + 2] = Math.sin(a) * r;
+  }
+  const orbGeo = new THREE.BufferGeometry();
+  orbGeo.setAttribute("position", new THREE.BufferAttribute(orbPos, 3));
+  g.add(new THREE.Points(orbGeo, new THREE.PointsMaterial({
+    size: 0.12, map: glowTexWhite, color: 0x8899ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true
+  })));
+  g.visible = false; g.position.set(-8, 3, -10); scene.add(g);
+  return g;
+}
+
+// --- KNOWLEDGE & DATA: 数据星云 ---
+function createKnowledge() {
+  const g = new THREE.Group();
+  const n = 1200, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const theta = Math.random() * Math.PI * 2, phi = Math.acos(2 * Math.random() - 1);
+    const r = 1.5 + Math.abs(gauss() * 3);
+    pos[i * 3] = Math.sin(phi) * Math.cos(theta) * r;
+    pos[i * 3 + 1] = Math.sin(phi) * Math.sin(theta) * r;
+    pos[i * 3 + 2] = Math.cos(phi) * r;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.add(new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 0.15, map: glowTexPurple, color: 0xccaaff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true
+  })));
+  g.visible = false; g.position.set(5, -2, -12); scene.add(g);
+  return g;
+}
+
+
+// ==================== 中心光晕环 ====================
+function createCoreHalo() {
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.06, 32, 128),
+    new THREE.MeshBasicMaterial({ color: 0x3366cc, transparent: true, opacity: 0.3 }));
+  ring.rotation.x = Math.PI * 0.5; ring.name = "coreHalo"; scene.add(ring);
+
+  const n = 300, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, r = 0.5 + Math.random() * 2;
+    pos[i * 3] = Math.cos(a) * r; pos[i * 3 + 1] = (Math.random() - 0.5) * 0.2; pos[i * 3 + 2] = Math.sin(a) * r;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 0.25, map: glowTexWhite, color: 0xaaccff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true
+  }));
+  pts.name = "coreHaloPts"; scene.add(pts);
+}
+
+// ==================== 构建所有 ====================
+buildGalaxy();
+createCoreHalo();
+themeGroups.biology = createDNA();
+themeGroups.web3 = createWeb3();
+themeGroups.comp = createComp();
+themeGroups.knowledge = createKnowledge();
+
+// ==================== 相机动画系统 ====================
+const cameraTargets = {
+  galaxy: { pos: [0, 22, 28], lookAt: [0, 0, 0] },
+  biology: { pos: [0, 0, 8], lookAt: [0, 0, -10] },
+  web3: { pos: [12, 4, 0], lookAt: [10, 2, -8] },
+  comp: { pos: [-6, 5, 2], lookAt: [-8, 3, -10] },
+  knowledge: { pos: [7, -1, -2], lookAt: [5, -2, -12] },
+};
+
+let camTarget = null, camFrom = null, camLookFrom = null, camProgress = 1;
+
+function animateCamTo(name) {
+  if (STATE.transitioning) return;
+  const t = cameraTargets[name];
+  if (!t) return;
+  STATE.transitioning = true;
+  camFrom = camera.position.clone();
+  camLookFrom = controls.target.clone();
+  camTarget = { pos: new THREE.Vector3(...t.pos), lookAt: new THREE.Vector3(...t.lookAt) };
+  camProgress = 0;
+}
+
+function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+// ==================== 场景切换 ====================
+function switchScene(name) {
+  if (STATE.activeScene === name) return;
+  STATE.activeScene = name;
+  Object.values(themeGroups).forEach(g => g.visible = false);
+  if (name !== "galaxy" && themeGroups[name]) themeGroups[name].visible = true;
+  if (galaxyUniforms) galaxyUniforms.uGlobalBrightness.value = name === "galaxy" ? 1.0 : 0.25;
+  animateCamTo(name);
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.scene === name));
+  document.querySelectorAll(".sector-text").forEach(el => el.classList.toggle("active", el.dataset.sector === name));
+}
+
+
+// ==================== 底部导航事件 ====================
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchScene(btn.dataset.scene));
+});
+
+// ==================== 板块文字事件：悬停高亮 + 点击转场 ====================
+const sectorMap = { biology: 0, web3: 1, comp: 2, knowledge: 3 };
+
+function updateSectorBrightness() {
+  if (!galaxyUniforms) return;
+  const sb = [1, 1, 1, 1];
+  if (STATE.hoveredSector) {
+    const idx = sectorMap[STATE.hoveredSector];
+    for (let i = 0; i < 4; i++) sb[i] = i === idx ? 1.6 : 0.25;
+  }
+  galaxyUniforms.uSectorBrightness.value.set(sb[0], sb[1], sb[2], sb[3]);
+}
+
+document.querySelectorAll(".sector-text").forEach(el => {
+  el.addEventListener("mouseenter", () => { STATE.hoveredSector = el.dataset.sector; updateSectorBrightness(); });
+  el.addEventListener("mouseleave", () => { STATE.hoveredSector = null; updateSectorBrightness(); });
+  el.addEventListener("click", () => switchScene(el.dataset.sector));
+});
+
+// ==================== Logo轮播 ====================
+const logos = ["Tesla","OpenAI","DeepMind","Stripe","SpaceX","Neuralink","Anthropic","Notion","Vercel","Supabase","Figma","Linear","Replit","Cursor","Midjourney","Stability AI"];
+(function buildLogos() {
+  const track = document.getElementById("logo-carousel-track");
+  track.innerHTML = [...logos, ...logos].map(n => '<span class="logo-item">' + n + '</span>').join("");
+})();
+
+// ==================== 鼠标追踪（投影到星系平面y=0） ====================
+const raycaster = new THREE.Raycaster();
+const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+window.addEventListener("mousemove", (e) => {
+  STATE.mouse.set(e.clientX, e.clientY);
+  STATE.mouseNdc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  raycaster.setFromCamera(STATE.mouseNdc, camera);
+  const hit = new THREE.Vector3();
+  if (raycaster.ray.intersectPlane(plane, hit)) STATE.mouseWorld.copy(hit);
+});
+
+// ==================== 响应式 ====================
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  if (galaxyUniforms) galaxyUniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
+});
+
+// ==================== 键盘快捷键 ====================
+window.addEventListener("keydown", (e) => {
+  const keys = { "1": "biology", "2": "web3", "3": "comp", "4": "knowledge", "0": "galaxy" };
+  if (keys[e.key]) switchScene(keys[e.key]);
+});
+
+
+// ==================== 渲染循环 ====================
+function animate(ts) {
+  requestAnimationFrame(animate);
+  const dt = Math.min(STATE.clock.getDelta(), 0.1);
+  const time = ts * 0.001;
+
+  // 更新着色器uniform
+  if (galaxyUniforms) {
+    galaxyUniforms.uTime.value = time;
+    galaxyUniforms.uMouseWorld.value.copy(STATE.mouseWorld);
+    const cur = galaxyUniforms.uMouseStrength.value;
+    galaxyUniforms.uMouseStrength.value += (4.0 - cur) * 0.08;
+  }
+
+  // 相机平滑转场动画
+  if (camProgress < 1 && camTarget) {
+    camProgress += dt * 1.2;
+    camProgress = Math.min(camProgress, 1);
+    const t = easeInOutCubic(camProgress);
+    camera.position.lerpVectors(camFrom, camTarget.pos, t);
+    controls.target.lerpVectors(camLookFrom, camTarget.lookAt, t);
+    if (camProgress >= 1) { STATE.transitioning = false; camTarget = null; }
+  }
+
+  // 主题场景自主旋转动画
+  if (themeGroups.biology?.visible) themeGroups.biology.rotation.y += dt * 0.4;
+  if (themeGroups.web3?.visible) themeGroups.web3.rotation.y += dt * 0.25;
+  if (themeGroups.comp?.visible) {
+    themeGroups.comp.children.forEach((c, i) => {
+      c.rotation.y += dt * 0.3 * (i + 1) * 0.5;
+      c.rotation.x += dt * 0.15 * (i % 2 ? -1 : 1);
+    });
+  }
+  if (themeGroups.knowledge?.visible) themeGroups.knowledge.rotation.y += dt * 0.15;
+
+  // 中心光晕缓慢旋转
+  const halo = scene.getObjectByName("coreHalo");
+  if (halo) halo.rotation.z += dt * 0.03;
+
+  // OrbitControls自动旋转速度：星系视图快，主题场景慢
+  controls.autoRotateSpeed = STATE.activeScene === "galaxy" ? 0.15 : 0.05;
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+// ==================== 启动 ====================
+requestAnimationFrame(animate);
+console.log("Blue Yard Galaxy ready - keyboard: 0=galaxy 1=DNA 2=Web3 3=Eng 4=Data");
+</script>
+</body>
+</html>
