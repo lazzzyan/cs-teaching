@@ -13,6 +13,10 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+<style>
+  /* 兜底：确保html/body/canvas绝不出现白色 */
+  html,body,#starfield-canvas{background:#000!important;background-color:#000!important}
+</style>
 </head>
 <body>
   <canvas id="starfield-canvas"></canvas>
@@ -39,3 +43,4 @@
   <script src="js/router.js"></script>
 </body>
 </html>
+
