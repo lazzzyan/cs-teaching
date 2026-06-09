@@ -1,4 +1,4 @@
-﻿// NAV v4 - 星系环按钮（零转场，纯页面切换）
+﻿// NAV — 星系环按钮 + 中心按钮
 const Nav = {
   render() {
     const ui = document.getElementById("galaxy-ui");
@@ -24,7 +24,7 @@ const Nav = {
     ui.appendChild(cb);
     if (!loggedIn) return;
 
-    // 环上功能按钮
+    // 环上4个功能按钮
     const btns = [
       { id: "feed", label: "资源广场", icon: "🏠" },
       { id: "upload", label: "上传资源", icon: "📤" },
@@ -33,7 +33,7 @@ const Nav = {
     ];
     if (isAdmin) btns.push({ id: "admin", label: "管理", icon: "⚙️" });
 
-    const count = btns.length, rx = 32, ry = 30;
+    const count = btns.length, rx = 30, ry = 28;
     btns.forEach((btn, i) => {
       const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
       const el = document.createElement("button");
@@ -45,16 +45,13 @@ const Nav = {
       ui.appendChild(el);
     });
 
-    // 退出
+    // 退出按钮
     const lo = document.createElement("button");
     lo.className = "galaxy-ring-btn galaxy-logout";
-    lo.innerHTML = '<span class="grb-icon">🚪</span><span class="grb-label">退出</span>';
-    const la = -Math.PI / 2 - 0.45;
-    lo.style.cssText = "position:absolute;top:" + (50 + Math.sin(la) * 38) + "vh;left:" + (50 + Math.cos(la) * 40) + "vw;transform:translate(-50%,-50%);";
+    lo.innerHTML = '<span class="grb-icon">🚪</span>';
     lo.title = "退出登录";
+    lo.style.cssText = "position:absolute;top:" + (50 + Math.sin(-Math.PI/2-0.5) * 36) + "vh;left:" + (50 + Math.cos(-Math.PI/2-0.5) * 38) + "vw;transform:translate(-50%,-50%);";
     lo.onclick = () => Auth.handleLogout();
     ui.appendChild(lo);
-  },
-
-  renderCircleNav() {}
+  }
 };

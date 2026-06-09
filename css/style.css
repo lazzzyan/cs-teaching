@@ -1,224 +1,50 @@
-﻿/* === 最高优先级：全局透明背景，禁止任何白色底色 === */
-html{background:transparent!important;background-color:transparent!important}
-body{background:transparent!important;background-color:transparent!important;min-height:100vh}
-#starfield-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;background:#000!important}
-/* ================================================================
-   CS教学平台 - 未来科技风主样式
-   深空粒子背景 / 赛博霓虹 / 玻璃拟态 / 圆形导航
-   ================================================================ */
+﻿/* CS教学平台 — 银河玻璃UI */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg-deep:#020510;--bg-panel:rgba(8,12,40,0.85);--bg-card:rgba(12,18,60,0.7);
-  --glass:rgba(16,24,80,0.55);--glass-hover:rgba(20,30,100,0.7);
-  --text:#e0e8ff;--text2:#8899cc;--text3:#5566aa;
-  --cyan:#00e5ff;--cyan-glow:rgba(0,229,255,0.35);--cyan-dim:rgba(0,229,255,0.12);
-  --magenta:#e040fb;--magenta-glow:rgba(224,64,251,0.35);
-  --gold:#ffd740;--gold-glow:rgba(255,215,64,0.3);
-  --red:#ff4060;--red-glow:rgba(255,64,96,0.3);--green:#00e676;
-  --border:rgba(100,140,255,0.12);--border-glow:rgba(0,229,255,0.25);
-  --radius:16px;--radius-sm:10px;--radius-xs:6px;
-  --font:'Segoe UI','Microsoft YaHei',sans-serif;--mono:'Cascadia Code',Consolas,monospace;
-  --ease:0.3s cubic-bezier(0.4,0,0.2,1);--ease-bounce:0.5s cubic-bezier(0.34,1.56,0.64,1);
+  --text:rgba(220,230,255,0.85);--text2:rgba(160,180,220,0.7);--text3:rgba(100,120,180,0.55);
+  --cyan:rgba(0,200,255,0.8);--cyan-glow:rgba(0,180,255,0.3);
+  --magenta:rgba(200,100,255,0.8);--gold:rgba(255,210,60,0.8);
+  --red:rgba(255,70,100,0.8);--green:rgba(0,220,120,0.8);
+  --border:rgba(255,255,255,0.08);--radius:14px;--radius-sm:8px;
+  --font:'Segoe UI','Microsoft YaHei',sans-serif;
+  --ease:0.3s ease;
 }
-html,body{width:100%;height:100%;overflow:hidden;background:transparent!important;background-color:transparent!important;color:rgba(220,230,255,0.85);font-family:var(--font);font-size:15px;line-height:1.6}
-a{color:var(--cyan);text-decoration:none;transition:var(--ease)}a:hover{text-shadow:0 0 12px var(--cyan-glow)}
-img,video{max-width:100%;border-radius:var(--radius-sm)}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.2);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border-radius:3px}
-@keyframes fadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
-@keyframes glowPulse{0%,100%{box-shadow:0 0 8px var(--cyan-glow)}50%{box-shadow:0 0 24px var(--cyan-glow),0 0 48px rgba(0,229,255,0.15)}}
-@keyframes borderGlow{0%,100%{border-color:var(--border)}50%{border-color:var(--border-glow)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
-@keyframes ripple{0%{transform:scale(0);opacity:1}100%{transform:scale(2);opacity:0}}
-/* === 星空背景 === */
-#starfield-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;background:transparent}
-#cursor-glow{position:fixed;pointer-events:none;z-index:-1;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(100,140,255,0.06) 0%,transparent 70%);transform:translate(-50%,-50%);transition:opacity 0.3s}
+html,body{width:100%;height:100%;overflow:hidden;background:transparent!important;background-color:transparent!important;color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6}
+#starfield-canvas{position:fixed;inset:0;z-index:0;background:#000!important}
+#cursor-glow{position:fixed;pointer-events:none;z-index:1;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(100,140,255,0.05) 0%,transparent 70%);transform:translate(-50%,-50%);transition:opacity 0.3s}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(100,150,220,0.2);border-radius:2px}
 
-/* === 主布局 === */
-
-
-
-/* === 顶部导航栏 - 玻璃拟态 === */
-
-.nav-left{display:flex;align-items:center;gap:16px}
-.nav-logo{cursor:pointer;font-size:1.4em;font-weight:900;letter-spacing:3px;
-  background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 10px var(--cyan-glow))}
-.nav-search2{display:flex;align-items:center;background:rgba(16,24,60,0.25);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid var(--border);border-radius:24px;
-  overflow:hidden;transition:var(--ease)}.nav-search2:focus-within{border-color:var(--cyan);box-shadow:0 0 16px var(--cyan-glow)}
-.nav-search2 input{background:none;border:none;color:rgba(220,230,255,0.85);padding:8px 16px;width:200px;font-size:.88em;outline:none}
-.nav-search2 button{background:linear-gradient(135deg,var(--cyan),var(--magenta));border:none;color:#000;font-weight:700;padding:8px 16px;cursor:pointer}
-.nav-center{display:flex;gap:2px}.nav-link{padding:8px 18px;border-radius:24px;color:rgba(160,180,220,0.7);font-size:.88em;
-  transition:var(--ease);white-space:nowrap;position:relative;overflow:hidden}
-.nav-link:hover,.nav-link.active{color:var(--cyan);background:var(--cyan-dim);text-decoration:none;box-shadow:0 0 12px var(--cyan-glow)}
-.nav-link.admin-link{color:var(--gold)}
-.nav-right{display:flex;align-items:center;gap:12px}
-.nav-user{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 14px;border-radius:24px;transition:var(--ease)}
-.nav-user:hover{background:rgba(16,24,60,0.25)}
-.nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--magenta));
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85em;color:#fff;box-shadow:0 0 14px var(--cyan-glow)}
-.nav-username{font-size:.9em;color:rgba(220,230,255,0.85)}
-.btn-logout{background:none;border:1px solid var(--border);color:rgba(160,180,220,0.7);padding:6px 12px;
-  border-radius:20px;cursor:pointer;font-size:.9em;transition:var(--ease)}
-.btn-logout:hover{border-color:var(--red);color:var(--red);box-shadow:0 0 12px var(--red-glow)}
-
-/* === 圆形主导航环(底部固定) === */
-#circle-nav{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:300;
-  display:flex;gap:6px;background:rgba(10,15,35,0.35);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--border);border-radius:40px;padding:6px 10px;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
-.circle-nav-item{width:52px;height:52px;border-radius:50%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;cursor:pointer;transition:var(--ease-bounce);background:rgba(16,24,60,0.25);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid transparent;
-  color:rgba(160,180,220,0.7);position:relative;font-size:.7em;gap:2px}
-.circle-nav-item .cn-icon{font-size:1.3em;transition:var(--ease)}
-.circle-nav-item .cn-label{font-size:.6em;opacity:0;max-height:0;overflow:hidden;transition:var(--ease)}
-.circle-nav-item:hover,.circle-nav-item.active{background:var(--cyan-dim);border-color:var(--cyan);
-  color:var(--cyan);box-shadow:0 0 20px var(--cyan-glow);transform:translateY(-8px);width:62px;height:62px}
-.circle-nav-item:hover .cn-label,.circle-nav-item.active .cn-label{opacity:1;max-height:20px}
-.circle-nav-item.active{animation:glowPulse 2s infinite}
-
-/* === 模块子导航 === */
-.module-subnav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;padding:14px 18px;
-  background:rgba(16,24,60,0.25);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid var(--border);border-radius:28px;backdrop-filter:blur(12px)}
-.subnav-item{padding:8px 20px;border-radius:20px;cursor:pointer;font-size:.85em;color:rgba(160,180,220,0.7);
-  transition:var(--ease);border:1px solid transparent;background:transparent}
-.subnav-item:hover,.subnav-item.active{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan);
-  box-shadow:0 0 10px rgba(0,229,255,0.15)}
-/* === 通用组件 === */
-.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--magenta));border:none;color:#000;font-weight:700;
-  padding:10px 28px;border-radius:24px;cursor:pointer;font-size:.92em;transition:var(--ease-bounce);
-  box-shadow:0 4px 20px var(--cyan-glow);letter-spacing:1px}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 36px var(--cyan-glow)}
-.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.btn-secondary{background:rgba(16,24,60,0.25);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid var(--border);color:rgba(220,230,255,0.85);
-  padding:10px 24px;border-radius:24px;cursor:pointer;font-size:.9em;transition:var(--ease)}
-.btn-secondary:hover{border-color:var(--cyan);box-shadow:0 0 12px var(--cyan-glow)}
-.btn-block{width:100%}.btn-sm{padding:5px 14px;font-size:.78em;border-radius:16px}
-.btn-icon{background:none;border:1px solid var(--border);color:rgba(160,180,220,0.7);width:38px;height:38px;
-  border-radius:50%;cursor:pointer;font-size:1em;display:flex;align-items:center;justify-content:center;transition:var(--ease)}
-.btn-icon:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 12px var(--cyan-glow)}
-.btn-back{background:rgba(16,24,60,0.25);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid var(--border);color:rgba(160,180,220,0.7);
-  padding:7px 16px;border-radius:20px;cursor:pointer;margin-bottom:16px;font-size:.85em;transition:var(--ease)}
-.btn-back:hover{border-color:var(--cyan);color:var(--cyan)}
-.btn-text-sm{background:none;border:none;color:rgba(100,120,180,0.6);cursor:pointer;font-size:.78em;padding:2px 6px}
-.btn-danger{background:rgba(255,64,96,0.12);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid rgba(255,64,96,0.3);color:var(--red);
-  padding:7px 16px;border-radius:20px;cursor:pointer;font-size:.82em;transition:var(--ease)}
-.btn-danger:hover{background:rgba(255,64,96,0.2);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);box-shadow:0 0 14px var(--red-glow)}
-.btn-danger-outline{background:none;border:1px solid rgba(255,64,96,0.3);color:var(--red);
-  padding:8px 18px;border-radius:20px;cursor:pointer;font-size:.82em;transition:var(--ease)}
-.btn-accept{background:rgba(0,230,118,0.12);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid rgba(0,230,118,0.3);color:var(--green);
-  padding:5px 12px;border-radius:16px;cursor:pointer;font-size:.78em}
-.btn-reject{background:rgba(255,64,96,0.12);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid rgba(255,64,96,0.3);color:var(--red);
-  padding:5px 12px;border-radius:16px;cursor:pointer;font-size:.78em}
-.btn-chat{background:linear-gradient(135deg,var(--cyan),var(--magenta));border:none;color:#000;
-  font-weight:600;padding:6px 16px;border-radius:16px;cursor:pointer;font-size:.82em}
-.loading{pointer-events:none;opacity:.6}.loading::after{content:'';display:inline-block;width:14px;height:14px;
-  border:2px solid transparent;border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite;margin-left:8px}
-
-.input-group{display:flex;flex-direction:column;gap:6px}.input-group label{font-size:.82em;color:rgba(160,180,220,0.7);font-weight:500}
-.input-group input,.input-group select,.input-group textarea{
-  background:rgba(16,24,60,0.25);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid var(--border);border-radius:var(--radius-xs);padding:11px 16px;
-  color:rgba(220,230,255,0.85);font-size:.92em;font-family:var(--font);outline:none;transition:var(--ease)}
-.input-group input:focus,.input-group select:focus,.input-group textarea:focus{
-  border-color:var(--cyan);box-shadow:0 0 12px var(--cyan-glow)}
-.input-group textarea{resize:vertical;min-height:90px}
-.filter-select{background:rgba(16,24,60,0.25);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border:1px solid var(--border);border-radius:22px;padding:8px 18px;
-  color:rgba(220,230,255,0.85);font-size:.82em;cursor:pointer;outline:none;transition:var(--ease)}
-.filter-select:focus{border-color:var(--cyan)}
-
-.loading-spinner{text-align:center;padding:60px;color:rgba(100,120,180,0.6)}.loading-spinner::after{content:'';
-  display:inline-block;width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--cyan);
-  border-radius:50%;animation:spin .8s linear infinite;margin-left:10px;vertical-align:middle}
-.empty-state{text-align:center;padding:60px;color:rgba(100,120,180,0.6);font-size:1em}
-.link{color:var(--cyan);cursor:pointer;transition:var(--ease)}.link:hover{color:var(--magenta)}
-.time-ago{color:rgba(100,120,180,0.6);font-size:.75em;white-space:nowrap}
-.tag{background:var(--cyan-dim);color:var(--cyan);padding:3px 10px;border-radius:12px;font-size:.73em;
-  cursor:pointer;transition:var(--ease);border:1px solid transparent}
-.tag:hover{background:rgba(0,229,255,0.2);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);border-color:var(--cyan)}
-
-/* === 星系UI层 === */
-#galaxy-ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none}
+/* 星系UI */
+#galaxy-ui{position:fixed;inset:0;z-index:10;pointer-events:none}
 #galaxy-ui>*{pointer-events:auto}
-
-/* 星系中心按钮 */
-.galaxy-center-btn{padding:16px 36px;border:1px solid rgba(255,255,255,0.12);border-radius:50px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.9);font-size:1.15em;font-weight:400;letter-spacing:0.08em;cursor:pointer;transition:all 0.5s ease;display:flex;align-items:center;gap:10px;box-shadow:0 0 35px rgba(80,130,220,0.15),inset 0 1px 1px rgba(255,255,255,0.06)}
-.galaxy-center-btn:hover{background:rgba(30,45,90,0.4);box-shadow:0 0 50px rgba(100,160,255,0.3),inset 0 1px 1px rgba(255,255,255,0.12);color:#fff;transform:translate(-50%,-50%) scale(1.04)}
-.gcb-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#5588ee,#9944dd);
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9em;color:#fff}
-.gcb-label{font-size:0.9em;opacity:0.9}
-
-/* 星系环按钮 */
-.galaxy-ring-btn{padding:10px 24px;border:1px solid rgba(255,255,255,0.08);border-radius:24px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.7);font-size:0.85em;cursor:pointer;transition:all 0.45s ease;display:flex;align-items:center;gap:8px;white-space:nowrap;letter-spacing:0.05em;box-shadow:0 0 20px rgba(80,130,220,0.1),inset 0 1px 1px rgba(255,255,255,0.04)}
-.galaxy-ring-btn:hover{background:rgba(30,45,90,0.4);color:#fff;box-shadow:0 0 35px rgba(100,160,255,0.3),inset 0 1px 1px rgba(255,255,255,0.1)}
-.grb-icon{font-size:1.1em}
-.grb-label{font-size:0.85em}
+.galaxy-center-btn{padding:14px 32px;border:1px solid rgba(255,255,255,0.1);border-radius:40px;background:rgba(15,22,50,0.3);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);color:rgba(220,235,255,0.9);font-size:1.05em;font-weight:400;letter-spacing:0.06em;cursor:pointer;transition:all 0.4s;display:flex;align-items:center;gap:10px;box-shadow:0 0 30px rgba(80,130,220,0.12)}
+.galaxy-center-btn:hover{background:rgba(25,38,80,0.45);border-color:rgba(160,200,255,0.25);box-shadow:0 0 45px rgba(80,150,255,0.3);transform:translate(-50%,-50%) scale(1.04);color:#fff}
+.gcb-icon{font-size:1.2em}
+.gcb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,rgba(80,140,240,0.5),rgba(140,70,220,0.5));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;box-shadow:0 0 12px rgba(100,150,255,0.3)}
+.gcb-label{font-size:0.9em;opacity:0.85}
+.galaxy-ring-btn{padding:9px 20px;border:1px solid rgba(255,255,255,0.07);border-radius:22px;background:rgba(15,25,55,0.28);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);color:rgba(200,220,255,0.75);font-size:0.82em;cursor:pointer;transition:all 0.4s;display:flex;align-items:center;gap:7px;white-space:nowrap;letter-spacing:0.04em;box-shadow:0 0 18px rgba(80,130,220,0.08)}
+.galaxy-ring-btn:hover{background:rgba(25,40,85,0.45);border-color:rgba(150,190,255,0.25);color:#fff;box-shadow:0 0 30px rgba(100,160,255,0.3)}
+.grb-icon{font-size:1.05em}
 .galaxy-logout{border-color:rgba(255,100,120,0.15)}
-.galaxy-logout:hover{box-shadow:0 0 30px rgba(255,100,130,0.25),inset 0 1px 1px rgba(255,255,255,0.08)}
+.galaxy-logout:hover{box-shadow:0 0 25px rgba(255,100,130,0.2)}
 
-/* 页面内容覆盖层 */
-#app-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:30;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;padding-top:15vh}
+/* 内容覆盖层 */
+#app-overlay{position:fixed;inset:0;z-index:20;pointer-events:none;display:none;align-items:flex-start;justify-content:center;padding-top:12vh}
 #app-overlay>*{pointer-events:auto}
-#app-container{width:min(90vw,680px);max-height:72vh;overflow-y:auto;background:rgba(10,15,35,0.35);backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px 36px;color:rgba(255,255,255,0.85);animation:fadeIn 0.5s ease-out;box-shadow:0 8px 48px rgba(0,0,0,0.5),0 0 80px rgba(80,130,220,0.1),inset 0 1px 1px rgba(255,255,255,0.04)}
+#app-container{width:min(88vw,650px);max-height:70vh;overflow-y:auto;background:rgba(8,14,30,0.4);backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px 32px;color:var(--text);animation:fadeIn 0.4s ease-out;box-shadow:0 8px 48px rgba(0,0,0,0.5),0 0 60px rgba(80,130,220,0.1)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-@keyframes fadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
-
-@media(max-width:768px){
-  .galaxy-ring-btn{padding:10px 24px;border:1px solid rgba(255,255,255,0.08);border-radius:24px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.7);font-size:0.85em;cursor:pointer;transition:all 0.45s ease;display:flex;align-items:center;gap:8px;white-space:nowrap;letter-spacing:0.05em;box-shadow:0 0 20px rgba(80,130,220,0.1),inset 0 1px 1px rgba(255,255,255,0.04)}
-  .galaxy-center-btn{padding:16px 36px;border:1px solid rgba(255,255,255,0.12);border-radius:50px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.9);font-size:1.15em;font-weight:400;letter-spacing:0.08em;cursor:pointer;transition:all 0.5s ease;display:flex;align-items:center;gap:10px;box-shadow:0 0 35px rgba(80,130,220,0.15),inset 0 1px 1px rgba(255,255,255,0.06)}
-  #app-container{width:min(90vw,680px);max-height:72vh;overflow-y:auto;background:rgba(10,15,35,0.35);backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px 36px;color:rgba(255,255,255,0.85);animation:fadeIn 0.5s ease-out;box-shadow:0 8px 48px rgba(0,0,0,0.5),0 0 80px rgba(80,130,220,0.1),inset 0 1px 1px rgba(255,255,255,0.04)}
-}
-
-/* === 星系UI层 === */
-#galaxy-ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none}
-#galaxy-ui>*{pointer-events:auto}
-
-/* 星系中心按钮 */
-.galaxy-center-btn{padding:16px 36px;border:1px solid rgba(255,255,255,0.12);border-radius:50px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.9);font-size:1.15em;font-weight:400;letter-spacing:0.08em;cursor:pointer;transition:all 0.5s ease;display:flex;align-items:center;gap:10px;box-shadow:0 0 35px rgba(80,130,220,0.15),inset 0 1px 1px rgba(255,255,255,0.06)}
-.galaxy-center-btn:hover{background:rgba(30,45,90,0.4);box-shadow:0 0 50px rgba(100,160,255,0.3),inset 0 1px 1px rgba(255,255,255,0.12);color:#fff;transform:translate(-50%,-50%) scale(1.04)}
-.gcb-icon{font-size:1.3em}
-.gcb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5588ee,#9944dd);
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9em;color:#fff;
-  box-shadow:0 0 15px rgba(100,150,255,0.4)}
-.gcb-label{font-size:0.95em;opacity:0.9}
-
-/* 星系环按钮 */
-.galaxy-ring-btn{padding:10px 24px;border:1px solid rgba(255,255,255,0.08);border-radius:24px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.7);font-size:0.85em;cursor:pointer;transition:all 0.45s ease;display:flex;align-items:center;gap:8px;white-space:nowrap;letter-spacing:0.05em;box-shadow:0 0 20px rgba(80,130,220,0.1),inset 0 1px 1px rgba(255,255,255,0.04)}
-.galaxy-ring-btn:hover{background:rgba(30,45,90,0.4);color:#fff;box-shadow:0 0 35px rgba(100,160,255,0.3),inset 0 1px 1px rgba(255,255,255,0.1)}
-.grb-icon{font-size:1.1em}
-.grb-label{font-size:0.85em}
-.galaxy-logout{border-color:rgba(255,100,120,0.15)}
-.galaxy-logout:hover{box-shadow:0 0 30px rgba(255,100,130,0.25),inset 0 1px 1px rgba(255,255,255,0.08)}
-
-/* 页面内容覆盖层 */
-#app-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:30;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;padding-top:15vh}
-#app-overlay>*{pointer-events:auto}
-#app-container{width:min(90vw,680px);max-height:72vh;overflow-y:auto;background:rgba(10,15,35,0.35);backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px 36px;color:rgba(255,255,255,0.85);animation:fadeIn 0.5s ease-out;box-shadow:0 8px 48px rgba(0,0,0,0.5),0 0 80px rgba(80,130,220,0.1),inset 0 1px 1px rgba(255,255,255,0.04)}
-
-@keyframes fadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
-
-@media(max-width:768px){
-  .galaxy-ring-btn{padding:10px 24px;border:1px solid rgba(255,255,255,0.08);border-radius:24px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.7);font-size:0.85em;cursor:pointer;transition:all 0.45s ease;display:flex;align-items:center;gap:8px;white-space:nowrap;letter-spacing:0.05em;box-shadow:0 0 20px rgba(80,130,220,0.1),inset 0 1px 1px rgba(255,255,255,0.04)}
-  .galaxy-center-btn{padding:16px 36px;border:1px solid rgba(255,255,255,0.12);border-radius:50px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.9);font-size:1.15em;font-weight:400;letter-spacing:0.08em;cursor:pointer;transition:all 0.5s ease;display:flex;align-items:center;gap:10px;box-shadow:0 0 35px rgba(80,130,220,0.15),inset 0 1px 1px rgba(255,255,255,0.06)}
-  #app-container{width:min(90vw,680px);max-height:72vh;overflow-y:auto;background:rgba(10,15,35,0.35);backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px 36px;color:rgba(255,255,255,0.85);animation:fadeIn 0.5s ease-out;box-shadow:0 8px 48px rgba(0,0,0,0.5),0 0 80px rgba(80,130,220,0.1),inset 0 1px 1px rgba(255,255,255,0.04)}
-}
-
-/* === 按钮辉光（匹配银河蓝紫） === */
-.galaxy-center-btn{padding:16px 36px;border:1px solid rgba(255,255,255,0.12);border-radius:50px;background:rgba(20,30,60,0.25);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(255,255,255,0.9);font-size:1.15em;font-weight:400;letter-spacing:0.08em;cursor:pointer;transition:all 0.5s ease;display:flex;align-items:center;gap:10px;box-shadow:0 0 35px rgba(80,130,220,0.15),inset 0 1px 1px rgba(255,255,255,0.06)}
-.galaxy-ring-btn:hover{background:rgba(30,45,90,0.4);color:#fff;box-shadow:0 0 35px rgba(100,160,255,0.3),inset 0 1px 1px rgba(255,255,255,0.1)}
-
-/* === 全局UI半透明约束（保留底层银河可视度） === */
-#app-overlay>*{pointer-events:auto}
-#app-container .glass-panel{background:rgba(10,15,35,0.35)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important}
-.modal-overlay{background:rgba(10,15,35,0.35)!important;backdrop-filter:blur(8px)!important}
-
-
-/* === 深度拟态玻璃基类 === */
-.glass-deep{background:rgba(10,15,35,0.35)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;border:1px solid rgba(120,160,240,0.08)!important;border-radius:18px!important;box-shadow:inset 0 1px 1px rgba(255,255,255,0.03),0 4px 24px rgba(0,0,0,0.3)!important}
-.modal-overlay{background:rgba(10,15,35,0.35)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important}
-.modal-content{background:rgba(10,15,35,0.35)!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;border:1px solid rgba(120,160,240,0.1)!important;border-radius:20px!important}
-
-
-
-
-
-
+/* 通用组件 */
+a{color:var(--cyan);text-decoration:none}a:hover{text-shadow:0 0 10px var(--cyan-glow)}
+.btn-primary{background:linear-gradient(135deg,rgba(0,180,255,0.7),rgba(160,60,240,0.7));border:none;color:#fff;font-weight:600;padding:10px 28px;border-radius:22px;cursor:pointer;font-size:0.9em;box-shadow:0 4px 20px rgba(0,180,255,0.2);transition:var(--ease)}.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 30px rgba(0,180,255,0.35)}
+.btn-secondary{background:rgba(20,30,60,0.25);border:1px solid var(--border);color:var(--text);padding:9px 22px;border-radius:20px;cursor:pointer;font-size:0.85em;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:var(--ease)}.btn-secondary:hover{border-color:rgba(0,180,255,0.3);box-shadow:0 0 15px rgba(0,180,255,0.15)}
+.btn-back{background:rgba(20,30,60,0.25);border:1px solid var(--border);color:var(--text2);padding:7px 16px;border-radius:18px;cursor:pointer;font-size:0.82em;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:var(--ease);margin-bottom:14px}.btn-back:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-danger{background:rgba(255,70,100,0.12);border:1px solid rgba(255,70,100,0.2);color:var(--red);padding:7px 16px;border-radius:18px;cursor:pointer;font-size:0.8em;transition:var(--ease)}.btn-danger:hover{background:rgba(255,70,100,0.2)}
+.input-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}.input-group label{font-size:0.78em;color:var(--text2)}
+.input-group input,.input-group select,.input-group textarea{background:rgba(15,25,50,0.3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:0.88em;font-family:var(--font);outline:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:var(--ease)}.input-group input:focus,.input-group select:focus,.input-group textarea:focus{border-color:var(--cyan);box-shadow:0 0 12px var(--cyan-glow)}
+.loading-spinner{text-align:center;padding:40px;color:var(--text3)}.empty-state{text-align:center;padding:40px;color:var(--text3)}
+.tag{background:rgba(0,180,255,0.1);color:var(--cyan);padding:3px 10px;border-radius:12px;font-size:0.72em;border:1px solid rgba(0,180,255,0.15)}.time-ago{color:var(--text3);font-size:0.72em}
+.link{color:var(--cyan);cursor:pointer}.link:hover{color:var(--magenta)}
+.modal-overlay{position:fixed;inset:0;z-index:50;background:rgba(2,4,14,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+.modal-content{background:rgba(10,16,36,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:500px;width:90vw}
+@media(max-width:768px){.galaxy-ring-btn{padding:7px 14px;font-size:0.75em}.galaxy-center-btn{padding:12px 24px;font-size:0.95em}#app-container{width:94vw;padding:18px 16px;max-height:65vh}}
