@@ -1,47 +1,68 @@
-﻿// NAV - 导航栏 + 圆形底部导航
+﻿// NAV v3 - 星系环导航按钮系统
 const Nav = {
   render() {
-    const nav = document.getElementById("main-navbar");
-    if (!nav) return;
+    const ui = document.getElementById("galaxy-ui");
+    if (!ui) return;
+    const loggedIn = !!App.currentUser;
     const isAdmin = App.currentProfile?.is_admin;
-    nav.innerHTML = `<div class="nav-left">
-      <div class="nav-logo" onclick="Router.go('feed')"><span class="logo-text">CS教学</span></div>
-      <div class="nav-search2"><input type="text" id="nav-search-input" placeholder="搜索资源..."><button id="nav-search-btn">🔍</button></div>
-    </div>
-    <div class="nav-center">
-      <a href="#" class="nav-link" onclick="Router.go('feed')">🏠 首页</a>
-      <a href="#" class="nav-link" onclick="Router.go('upload')">📤 上传</a>
-      <a href="#" class="nav-link" onclick="Router.go('friends')">👥 好友</a>
-      ${isAdmin?'<a href="#" class="nav-link admin-link" onclick="Router.go(\'admin\')">⚙️ 管理</a>':''}
-    </div>
-    <div class="nav-right">
-      <div class="nav-user" onclick="Router.go('profile')"><div class="nav-avatar">${(App.currentProfile?.username||"U")[0].toUpperCase()}</div><span class="nav-username">${App.currentProfile?.username||"用户"}</span></div>
-      <button class="btn-logout" onclick="Auth.handleLogout()" title="退出登录">🚪</button>
-    </div>`;
 
-    document.getElementById("nav-search-btn")?.addEventListener("click",()=>{const q=document.getElementById("nav-search-input").value.trim();if(q)Router.go("search",q);});
-    document.getElementById("nav-search-input")?.addEventListener("keydown",(e)=>{if(e.key==="Enter"){const q=e.target.value.trim();if(q)Router.go("search",q);}});
+    // 清除旧按钮
+    ui.innerHTML = "";
 
-    // 圆形底部导航
-    this.renderCircleNav();
+    // 中心按钮
+    const centerBtn = document.createElement("button");
+    centerBtn.className = "galaxy-center-btn";
+    if (loggedIn) {
+      centerBtn.innerHTML = '<span class="gcb-avatar">' + (App.currentProfile?.username || "U")[0].toUpperCase() + '</span><span class="gcb-label">' + (App.currentProfile?.username || "用户") + '</span>';
+      centerBtn.onclick = () => Router.go("profile");
+    } else {
+      centerBtn.textContent = "进入平台";
+      centerBtn.onclick = () => Router.go("login");
+    }
+    ui.appendChild(centerBtn);
+
+    if (!loggedIn) {
+      // 未登录只显示中心按钮
+      return;
+    }
+
+    // 环上功能按钮（已登录）
+    const ringBtns = [
+      { id: "feed", label: "资源广场", icon: "🏠", scene: "engineering" },
+      { id: "upload", label: "上传资源", icon: "📤", scene: "dna" },
+      { id: "friends", label: "好友", icon: "👥", scene: "web3" },
+      { id: "chat", label: "聊天", icon: "💬", scene: "data" },
+    ];
+    if (isAdmin) {
+      ringBtns.push({ id: "admin", label: "管理", icon: "⚙️", scene: "data" });
+    }
+
+    ringBtns.forEach((btn, i) => {
+      const angle = (i / ringBtns.length) * Math.PI * 2 - Math.PI / 2;
+      const el = document.createElement("button");
+      el.className = "galaxy-ring-btn";
+      el.innerHTML = '<span class="grb-icon">' + btn.icon + '</span><span class="grb-label">' + btn.label + '</span>';
+      el.style.setProperty("--ring-angle", angle + "rad");
+      el.dataset.scene = btn.scene;
+      el.onclick = () => {
+        // 触发相机转场
+        if (window.starfield) window.starfield.transitionTo(btn.id, () => {
+          Router.go(btn.id);
+        });
+      };
+      ui.appendChild(el);
+    });
+
+    // 退出按钮
+    const logoutBtn = document.createElement("button");
+    logoutBtn.className = "galaxy-ring-btn galaxy-logout";
+    logoutBtn.innerHTML = '<span class="grb-icon">🚪</span><span class="grb-label">退出</span>';
+    logoutBtn.style.setProperty("--ring-angle", (-Math.PI / 2 - 0.4) + "rad");
+    logoutBtn.onclick = () => Auth.handleLogout();
+    ui.appendChild(logoutBtn);
   },
 
   renderCircleNav() {
-    const cn = document.getElementById("circle-nav");
-    if (!cn) return;
-    const isAdmin = App.currentProfile?.is_admin;
-    const pages = [
-      {id:"feed",icon:"🏠",label:"首页"},
-      {id:"upload",icon:"📤",label:"上传"},
-      {id:"friends",icon:"👥",label:"好友"},
-      {id:"profile",icon:"👤",label:"我的"},
-      ...(isAdmin?[{id:"admin",icon:"⚙️",label:"管理"}]:[])
-    ];
-    cn.innerHTML = pages.map(p=>`
-      <div class="circle-nav-item${Router.currentPage===p.id?' active':''}" onclick="Router.go('${p.id}')" title="${p.label}">
-        <span class="cn-icon">${p.icon}</span>
-        <span class="cn-label">${p.label}</span>
-      </div>
-    `).join("");
+    // 废弃圆形底部导航
   }
 };

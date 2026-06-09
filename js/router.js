@@ -1,4 +1,4 @@
-﻿// ROUTER - 页面路由 + 3D转场
+﻿// ROUTER v3 - 页面路由 + 星系相机转场
 const Router = {
   currentPage: "login",
   transitioning: false,
@@ -8,12 +8,16 @@ const Router = {
     this.transitioning = true;
     this.currentPage = page;
     if (page !== "chat") Chat.cleanup();
-    if (window.starfield) window.starfield.pageTransition("out");
 
-    setTimeout(() => {
-      const container = document.getElementById("app-container");
+    const overlay = document.getElementById("app-overlay");
+    const container = document.getElementById("app-container");
+
+    // 需要转场的页面列表
+    const scenePages = ["feed", "upload", "edit-resource", "friends", "chat", "admin", "search", "profile"];
+
+    const renderPage = () => {
       container.innerHTML = "";
-      container.className = `page-${page}`;
+      container.className = "page-" + page;
 
       switch (page) {
         case "login": Auth.renderLogin(); break;
@@ -29,14 +33,26 @@ const Router = {
         case "search": Resources.renderSearch(data); break;
       }
 
-      // 更新圆形导航高亮
-      Nav.renderCircleNav();
+      Nav.render();
+      if (overlay) overlay.style.display = "flex";
 
       setTimeout(() => {
-        if (window.starfield) window.starfield.pageTransition("in");
         this.transitioning = false;
-      }, 150);
-    }, 400);
+      }, 200);
+    };
+
+    // 隐藏覆盖层
+    if (overlay) overlay.style.display = "none";
+
+    if (scenePages.includes(page) && window.starfield) {
+      // 相机转场
+      window.starfield.transitionTo(page, () => {
+        renderPage();
+      });
+    } else {
+      // 无转场直接渲染（login/register/resource-detail）
+      setTimeout(() => renderPage(), 300);
+    }
   }
 };
 
@@ -50,12 +66,18 @@ const App = {
     const canvas = document.getElementById("starfield-canvas");
     if (canvas) { window.starfield = new StarfieldEngine(canvas); }
 
+    // 初始隐藏覆盖层
+    const overlay = document.getElementById("app-overlay");
+    if (overlay) overlay.style.display = "none";
+
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       this.currentUser = session.user;
       await this.loadProfile();
+      Nav.render();
       Router.go("feed");
     } else {
+      Nav.render();
       Router.go("login");
     }
 
@@ -63,15 +85,21 @@ const App = {
       if (event === "SIGNED_IN" && session) {
         this.currentUser = session.user;
         await this.loadProfile();
+        Nav.render();
         Router.go("feed");
       } else if (event === "SIGNED_OUT") {
         this.currentUser = null;
         this.currentProfile = null;
+        Nav.render();
         Router.go("login");
       }
     });
 
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelectorAll(".modal-overlay").forEach(m => m.remove()); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal-overlay").forEach(m => m.remove());
+      }
+    });
   },
 
   async loadProfile() {
