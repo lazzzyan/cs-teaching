@@ -7,11 +7,11 @@
 const CFG = {
   AUTO_ROTATE_PERIOD: 25,       // 星系自转一圈秒数
   GRAVITY_STRENGTH: 2.45,      // 鼠标引力强度（下调30%）
-  GLOW_INTENSITY: 0.02,        // 粒子辉光强度
+  GLOW_INTENSITY: 0.045,        // 粒子辉光强度
   TRANSITION_MS: 1000,         // 相机转场时长ms
   TRANSITION_EASE: "power2.out",
-  PARTICLE_SIZE_BASE: 140,     // 粒子基础尺寸缩放
-  PARTICLE_SIZE_MAX: 16,       // 粒子最大像素
+  PARTICLE_SIZE_BASE: 220,     // 粒子基础尺寸缩放
+  PARTICLE_SIZE_MAX: 22,       // 粒子最大像素
   CAMERA_DISTANCE: 28,         // 星系视图相机距中心距离
   CAMERA_HEIGHT: 20,           // 星系视图相机高度
 };
@@ -45,9 +45,9 @@ class StarfieldEngine {
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace; this.renderer.setClearColor(0x000000, 0);
 
-    this.scene = new THREE.Scene();
+    this.scene = new THREE.Scene(); this.scene.background = null;
 
     // 相机初始位置：俯视星系
     this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.5, 200);
@@ -123,7 +123,7 @@ class StarfieldEngine {
         void main() {
           float d = length(gl_PointCoord - 0.5) * 2.0;
           float alpha = 1.0 - smoothstep(0.0, 0.5, d);
-          alpha = pow(alpha, 1.3);
+          alpha = pow(alpha, 1.05);
           float glow = exp(-d * 8.0) * ${CFG.GLOW_INTENSITY};
           gl_FragColor = vec4(vColor * (1.0 + glow), vAlpha * alpha);
         }
@@ -493,3 +493,4 @@ class StarfieldEngine {
 }
 
 window.StarfieldEngine = StarfieldEngine;
+
