@@ -25,9 +25,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000!important;backg
 .sector.active .sector-btn{border-color:rgba(160,200,255,0.4);box-shadow:0 0 40px rgba(64,48,216,0.6),0 0 80px rgba(0,180,255,0.3)}
 
 /* 内容卡片 */
-#content-overlay{position:fixed;inset:0;z-index:20;pointer-events:none;display:none;align-items:center;justify-content:center}
+#content-overlay{position:fixed;inset:0;z-index:20;pointer-events:none;display:none;align-items:center;justify-content:center;padding:10vh 10vw}
 #content-overlay.show{display:flex}
-#content-card{pointer-events:auto;width:min(85vw,500px);max-height:70vh;overflow-y:auto;background:rgba(10,15,35,0.3);backdrop-filter:blur(22px) saturate(130%);-webkit-backdrop-filter:blur(22px) saturate(130%);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:32px;color:#e0e6ff;box-shadow:0 8px 48px rgba(0,0,0,0.6),0 0 80px rgba(80,130,220,0.12);animation:fadeUp 0.5s ease-out}
+#content-card{pointer-events:auto;width:min(76vw,420px);max-height:60vh;overflow-y:auto;background:rgba(10,15,35,0.3);backdrop-filter:blur(22px) saturate(130%);-webkit-backdrop-filter:blur(22px) saturate(130%);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px 30px;color:#e0e6ff;box-shadow:0 8px 48px rgba(0,0,0,0.6),0 0 60px rgba(80,130,220,0.15);animation:fadeUp 0.45s ease-out}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 #card-title{font-size:1.4em;font-weight:300;letter-spacing:0.06em;margin-bottom:16px;color:rgba(220,235,255,0.9)}
 #card-desc{font-size:0.9em;color:rgba(180,200,230,0.7);line-height:1.7;margin-bottom:24px}
@@ -35,10 +35,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000!important;backg
 #btn-back:hover{background:rgba(30,45,90,0.5);border-color:rgba(160,200,255,0.3);box-shadow:0 0 25px rgba(64,48,216,0.5);color:#fff}
 
 /* 响应式 */
-@media(max-width:768px){
-  .sector-btn{width:48px;height:48px;font-size:1.2em}
-  .sector-label{font-size:10px}
-  #content-card{width:92vw;padding:20px;max-height:75vh}
+@media(max-width:768px){.sector-btn{width:44px;height:44px;font-size:1.1em}.sector-label{font-size:10px}#content-card{width:82vw;padding:20px;max-height:55vh}.sector[data-scene]{top:14%!important}.sector[data-scene=comp],.sector[data-scene=knowledge]{bottom:16%!important}}
+  #content-card{pointer-events:auto;width:min(76vw,420px);max-height:60vh;overflow-y:auto;background:rgba(10,15,35,0.3);backdrop-filter:blur(22px) saturate(130%);-webkit-backdrop-filter:blur(22px) saturate(130%);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px 30px;color:#e0e6ff;box-shadow:0 8px 48px rgba(0,0,0,0.6),0 0 60px rgba(80,130,220,0.15);animation:fadeUp 0.45s ease-out}
 }
 </style>
 </head>
@@ -47,19 +45,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000!important;backg
 
 <!-- 4个浮动按钮 -->
 <div id="galaxy-ui">
-  <div class="sector" id="sec-biology" data-scene="biology" style="top:22%;left:12%">
+  <div class="sector" id="sec-biology" data-scene="biology" style="top:18%;left:10%">
     <span class="sector-label">BIOLOGY</span>
     <button class="sector-btn">🧬</button>
   </div>
-  <div class="sector" id="sec-web3" data-scene="web3" style="top:22%;right:12%">
+  <div class="sector" id="sec-web3" data-scene="web3" style="top:18%;right:10%">
     <span class="sector-label">WEB3</span>
     <button class="sector-btn">🌐</button>
   </div>
-  <div class="sector" id="sec-comp" data-scene="comp" style="bottom:26%;left:12%">
+  <div class="sector" id="sec-comp" data-scene="comp" style="bottom:22%;left:10%">
     <span class="sector-label">COMPUTATION</span>
     <button class="sector-btn">⚙️</button>
   </div>
-  <div class="sector" id="sec-knowledge" data-scene="knowledge" style="bottom:26%;right:12%">
+  <div class="sector" id="sec-knowledge" data-scene="knowledge" style="bottom:22%;right:10%">
     <span class="sector-label">KNOWLEDGE</span>
     <button class="sector-btn">✨</button>
   </div>
@@ -413,3 +411,4 @@ console.log("%c🚀 Galaxy Ready %c| %c" + C.TOTAL_PARTICLES + " particles %c| %
 </script>
 </body>
 </html>
+
