@@ -2,3 +2,6 @@
 .netlify/
 .vercel/
 package-lock.json
+
+dist-electron/
+_*.py

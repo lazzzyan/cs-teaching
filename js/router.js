@@ -19,11 +19,11 @@ const Router = {
       switch (page) {
         case "login": Auth.renderLogin(); break;
         case "register": Auth.renderRegister(); break;
-        case "feed": Resources.renderFeed(); break;
+        case "feed": if (overlay) { overlay.style.justifyContent = "flex-end"; overlay.style.paddingRight = "3vw"; overlay.style.paddingLeft = "0"; } Resources.renderFeed(); break;
         case "upload": Resources.renderUpload(); break;
         case "edit-resource": Resources.renderUpload(data); break;
         case "resource-detail": Resources.renderDetail(data); break;
-        case "profile": Profile.render(data); break;
+        case "profile": if (overlay) { overlay.style.justifyContent = "flex-start"; overlay.style.paddingRight = "0"; overlay.style.paddingLeft = "3vw"; } Profile.render(data); break;
         case "friends": Friends.render(); break;
         case "chat": Chat.render(data); break;
         case "admin": Admin.render(); break;
@@ -40,7 +40,7 @@ const Router = {
       return;
     }
 
-    if (overlay) overlay.style.display = "none";
+    if (overlay) { overlay.style.display = "none"; overlay.style.justifyContent = "flex-end"; overlay.style.paddingRight = "3vw"; overlay.style.paddingLeft = "0"; }
     if (window.starfield) {
       window.starfield.transitionTo(page, function() { render(); });
     } else {
@@ -56,7 +56,7 @@ const Router = {
     var overlay = document.getElementById("app-overlay");
     var container = document.getElementById("app-container");
     container.innerHTML = "";
-    if (overlay) overlay.style.display = "none";
+    if (overlay) { overlay.style.display = "none"; overlay.style.justifyContent = "flex-end"; overlay.style.paddingRight = "3vw"; overlay.style.paddingLeft = "0"; }
     var self = this;
     if (window.starfield) {
       window.starfield.resetToGalaxy(function() {
@@ -98,6 +98,15 @@ const App = {
         self.currentUser = null;
         self.currentProfile = null;
         Router.goHome();
+      }
+    });
+
+    // Galaxy center download button
+    window.addEventListener("galaxyCenterProximity", function(e) {
+      var btn = document.getElementById("download-client");
+      if (btn) {
+        if (e.detail.near) { btn.classList.add("visible"); }
+        else { btn.classList.remove("visible"); }
       }
     });
 

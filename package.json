@@ -1,5 +1,40 @@
 {
+  "name": "cs-teaching",
+  "version": "1.0.0",
+  "description": "CS教学平台 — 3D银河桌面版",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "node_modules\\electron\\dist\\electron.exe .",
+    "build": "node_modules\\electron\\dist\\electron.exe . & echo Use: npx electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.csteaching.desktop",
+    "productName": "CS-Teaching",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": null
+    },
+    "portable": {
+      "artifactName": "CS-Teaching-Setup.exe"
+    },
+    "files": [
+      "index.html",
+      "css/**/*",
+      "js/**/*",
+      "electron/**/*",
+      "!node_modules",
+      "!dist-electron"
+    ],
+    "asar": true
+  },
   "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
     "netlify-cli": "^26.1.0",
     "surge": "^0.27.4",
     "vercel": "^54.9.1",

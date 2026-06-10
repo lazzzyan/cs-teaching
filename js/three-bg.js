@@ -175,11 +175,11 @@ class StarfieldEngine {
       const pos = new Float32Array(nodes.length * 3);
       nodes.forEach((n, i) => { pos[i * 3] = n.x; pos[i * 3 + 1] = n.y; pos[i * 3 + 2] = n.z; });
       const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-      web.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.4, map: tex, color: 0x9977ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      web.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.7, map: tex, color: 0x9977ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
       for (let i = 0; i < nodes.length; i++)
         for (let j = i + 1; j < nodes.length; j++)
           if (nodes[i].distanceTo(nodes[j]) < 2.0 && Math.random() < 0.08)
-            web.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]), new THREE.LineBasicMaterial({ color: 0x6655cc, transparent: true, opacity: 0.35 })));
+            web.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]), new THREE.LineBasicMaterial({ color: 0x6655cc, transparent: true, opacity: 0.6 })));
     }
     web.visible = false; web.position.set(10, 2, -8); this.scene.add(web); this.scenes.web3 = web;
 
@@ -306,6 +306,13 @@ class StarfieldEngine {
       this.galaxyUniforms.uMouse.value.copy(this.mouseWorld);
       const cur = this.galaxyUniforms.uStr.value;
       this.galaxyUniforms.uStr.value += ((this.mouseWorld.x < 999 ? CFG.GRAVITY : 0) - cur) * 0.06;
+      // Galaxy center proximity: emit event for download button
+      const cd = this.mouseWorld.length();
+      const nearCenter = cd < 1.5;
+      if (nearCenter !== this._wasNearCenter) {
+        this._wasNearCenter = nearCenter;
+        window.dispatchEvent(new CustomEvent("galaxyCenterProximity", { detail: { near: nearCenter } }));
+      }
     }
 
     if (this.state === "galaxy") {
