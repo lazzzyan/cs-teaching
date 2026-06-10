@@ -83,7 +83,7 @@ const App = {
         this.currentUser = session.user;
         await this.loadProfile();
         if (Router.currentPage === "login" || Router.currentPage === "register") {
-          Router.go("feed");
+          Router.goHome();
         } else {
           Nav.render();
         }
@@ -109,5 +109,6 @@ const App = {
 };
 
 document.addEventListener("DOMContentLoaded", () => App.init());
+
 
 
