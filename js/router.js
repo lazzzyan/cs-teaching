@@ -101,12 +101,25 @@ const App = {
       }
     });
 
-    // Galaxy center download button
+    // Galaxy center download button - follows mouse
+    var dlBtn = document.getElementById("download-client");
+    var mouseX = 0, mouseY = 0;
+    document.addEventListener("mousemove", function(e) {
+      mouseX = e.clientX; mouseY = e.clientY;
+      if (dlBtn && dlBtn.classList.contains("visible")) {
+        dlBtn.style.left = mouseX + "px";
+        dlBtn.style.top = mouseY + "px";
+      }
+    });
     window.addEventListener("galaxyCenterProximity", function(e) {
-      var btn = document.getElementById("download-client");
-      if (btn) {
-        if (e.detail.near) { btn.classList.add("visible"); }
-        else { btn.classList.remove("visible"); }
+      if (dlBtn) {
+        if (e.detail.near) {
+          dlBtn.style.left = mouseX + "px";
+          dlBtn.style.top = mouseY + "px";
+          dlBtn.classList.add("visible");
+        } else {
+          dlBtn.classList.remove("visible");
+        }
       }
     });
 
