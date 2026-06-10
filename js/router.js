@@ -1,135 +1,118 @@
-// ROUTER — 左侧栏路由 + 3D场景转场
+// ROUTER - sidebar routing + 3D scene transitions
 const Router = {
-  currentPage: null,     // null=星系主页, 其他=功能页
+  currentPage: null,
   transitioning: false,
 
-  // 前往页面
-  go(page, data = null) {
+  go(page, data) {
     if (this.transitioning) return;
     this.transitioning = true;
     if (page !== "chat") Chat.cleanup();
+    var overlay = document.getElementById("app-overlay");
+    var container = document.getElementById("app-container");
+    var scenePages = ["feed","upload","edit-resource","friends","chat","admin","search","profile"];
+    var self = this;
 
-    const overlay = document.getElementById("app-overlay");
-    const container = document.getElementById("app-container");
-
-    // 需要3D场景切换的页面列表
-    const scenePages = ["feed", "upload", "edit-resource", "friends", "chat", "admin", "search", "profile"];
-
-    // 渲染函数
-    const render = () => {
-      this.currentPage = page;
+    var render = function() {
+      self.currentPage = page;
       container.innerHTML = "";
       container.className = "page-" + page;
-
       switch (page) {
-        case "login":    Auth.renderLogin(); break;
+        case "login": Auth.renderLogin(); break;
         case "register": Auth.renderRegister(); break;
-        case "feed":     Resources.renderFeed(); break;
-        case "upload":   Resources.renderUpload(); break;
+        case "feed": Resources.renderFeed(); break;
+        case "upload": Resources.renderUpload(); break;
         case "edit-resource": Resources.renderUpload(data); break;
         case "resource-detail": Resources.renderDetail(data); break;
-        case "profile":  Profile.render(data); break;
-        case "friends":  Friends.render(); break;
-        case "chat":     Chat.render(data); break;
-        case "admin":    Admin.render(); break;
-        case "search":   Resources.renderSearch(data); break;
+        case "profile": Profile.render(data); break;
+        case "friends": Friends.render(); break;
+        case "chat": Chat.render(data); break;
+        case "admin": Admin.render(); break;
+        case "search": Resources.renderSearch(data); break;
       }
-
       if (overlay) overlay.style.display = "flex";
-      Nav.render(); // 刷新侧栏高亮
-      this.transitioning = false;
+      Nav.render();
+      self.transitioning = false;
     };
 
-    // 非场景页面（登录/注册等）直接渲染
-    if (!scenePages.includes(page)) {
+    if (scenePages.indexOf(page) === -1) {
       if (overlay) overlay.style.display = "flex";
-      setTimeout(() => render(), 100);
+      setTimeout(function() { render(); }, 100);
       return;
     }
 
-    // 场景页面：先隐藏再转场
     if (overlay) overlay.style.display = "none";
-
     if (window.starfield) {
-      window.starfield.transitionTo(page, () => render());
+      window.starfield.transitionTo(page, function() { render(); });
     } else {
-      setTimeout(() => render(), 200);
+      setTimeout(function() { render(); }, 200);
     }
   },
 
-  // 返回星系主页
   goHome() {
     if (this.transitioning) return;
     this.transitioning = true;
     this.currentPage = null;
     Chat.cleanup();
-
-    const overlay = document.getElementById("app-overlay");
-    const container = document.getElementById("app-container");
+    var overlay = document.getElementById("app-overlay");
+    var container = document.getElementById("app-container");
     container.innerHTML = "";
-
     if (overlay) overlay.style.display = "none";
-
+    var self = this;
     if (window.starfield) {
-      window.starfield.resetToGalaxy(() => {
+      window.starfield.resetToGalaxy(function() {
         Nav.render();
-        this.transitioning = false;
+        self.transitioning = false;
       });
     } else {
       Nav.render();
-      this.transitioning = false;
+      self.transitioning = false;
     }
   }
 };
 
-// 应用入口
 const App = {
   currentUser: null,
   currentProfile: null,
 
   async init() {
     initSupabase();
-    const canvas = document.getElementById("starfield-canvas");
+    var canvas = document.getElementById("starfield-canvas");
     if (canvas) window.starfield = new StarfieldEngine(canvas);
-
-    // 初始：仅显示星系 + 左侧栏
     Nav.render();
 
-    // 检查已登录状态
-    const { data: { session } } = await supabase.auth.getSession();
+    var _a = await supabase.auth.getSession();
+    var session = _a.data.session;
     if (session) {
       this.currentUser = session.user;
       await this.loadProfile();
-      Nav.render(); // 刷新显示用户名
+      Nav.render();
     }
 
-    // 监听认证状态变化
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        this.currentUser = session.user;
-        await this.loadProfile();
-        // 登录/注册后直接回到星系主页
+    var self = this;
+    supabase.auth.onAuthStateChange(async function(event, sess) {
+      if (event === "SIGNED_IN" && sess) {
+        self.currentUser = sess.user;
+        await self.loadProfile();
         Router.goHome();
       } else if (event === "SIGNED_OUT") {
-        this.currentUser = null;
-        this.currentProfile = null;
+        self.currentUser = null;
+        self.currentProfile = null;
         Router.goHome();
       }
     });
 
-    // Esc关闭弹窗
-    document.addEventListener("keydown", e => {
+    document.addEventListener("keydown", function(e) {
       if (e.key === "Escape") {
-        document.querySelectorAll(".modal-overlay").forEach(m => m.remove());
+        document.querySelectorAll(".modal-overlay").forEach(function(m) { m.remove(); });
       }
     });
   },
 
   async loadProfile() {
     if (!this.currentUser) return;
-    const { data } = await supabase.from("profiles").select("*").eq("id", this.currentUser.id).single();
-    this.currentProfile = data;
+    var _a = await supabase.from("profiles").select("*").eq("id", this.currentUser.id).single();
+    this.currentProfile = _a.data;
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => App.init());
+document.addEventListener("DOMContentLoaded", function() { App.init(); });
