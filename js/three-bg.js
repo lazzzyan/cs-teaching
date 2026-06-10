@@ -209,10 +209,7 @@ class StarfieldEngine {
   };
 
   pageToScene = {
-    upload: "dna", "edit-resource": "dna",
-    feed: "engineering", admin: "engineering",
-    friends: "web3", chat: "web3",
-    profile: "data", search: "data",
+    upload: "dna", "edit-resource": "dna", admin: "dna", feed: "web3", friends: "engineering", chat: "engineering", profile: "data", search: "data",
   };
 
   transitionTo(page, cb) {
@@ -299,3 +296,4 @@ class StarfieldEngine {
 }
 
 window.StarfieldEngine = StarfieldEngine;
+
