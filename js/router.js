@@ -1,11 +1,14 @@
 ﻿// ROUTER — 路由 + 转场
 const Router = {
-  currentPage: "login", transitioning: false,
+  currentPage: null,     // null=星系主页, 其他=功能页
+  transitioning: false,
+  inSubPage: false,      // 是否在功能子页面
 
   go(page, data = null) {
     if (this.transitioning) return;
     this.transitioning = true;
     this.currentPage = page;
+    this.inSubPage = (page !== null && page !== "galaxy");
     if (page !== "chat") Chat.cleanup();
 
     const overlay = document.getElementById("app-overlay");
@@ -13,6 +16,14 @@ const Router = {
     const scenePages = ["feed", "upload", "edit-resource", "friends", "chat", "admin", "search", "profile"];
 
     const render = () => {
+      if (page === null) {
+        // 返回星系主页：隐藏覆盖层、重置相机
+        if (overlay) overlay.style.display = "none";
+        if (window.starfield) window.starfield.resetToGalaxy();
+        Nav.render();
+        this.transitioning = false;
+        return;
+      }
       container.innerHTML = ""; container.className = "page-" + page;
       switch (page) {
         case "login": Auth.renderLogin(); break;
@@ -37,9 +48,12 @@ const Router = {
     if (scenePages.includes(page) && window.starfield) {
       window.starfield.transitionTo(page, () => render());
     } else {
-      setTimeout(() => render(), 250);
+      setTimeout(() => render(), 200);
     }
-  }
+  },
+
+  // 返回星系主页
+  goHome() { this.go(null); }
 };
 
 const App = {
@@ -54,15 +68,33 @@ const App = {
     if (overlay) overlay.style.display = "none";
 
     const { data: { session } } = await supabase.auth.getSession();
-    if (session) { this.currentUser = session.user; await this.loadProfile(); Nav.render(); Router.go("feed"); }
-    else { Nav.render(); Router.go("login"); }
+    if (session) {
+      this.currentUser = session.user;
+      await this.loadProfile();
+      Nav.render();
+      // 已登录也不自动跳转，保持星系主页
+    } else {
+      // 未登录：仅显示星系+中心按钮，不跳转登录页
+      Nav.render();
+    }
 
     supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session) { this.currentUser = session.user; await this.loadProfile(); Nav.render(); Router.go("feed"); }
-      else if (event === "SIGNED_OUT") { this.currentUser = null; this.currentProfile = null; Nav.render(); Router.go("login"); }
+      if (event === "SIGNED_IN" && session) {
+        this.currentUser = session.user;
+        await this.loadProfile();
+        Nav.render();
+      } else if (event === "SIGNED_OUT") {
+        this.currentUser = null;
+        this.currentProfile = null;
+        // 退出后返回星系主页
+        if (Router.inSubPage) Router.goHome();
+        else Nav.render();
+      }
     });
 
-    document.addEventListener("keydown", e => { if (e.key === "Escape") document.querySelectorAll(".modal-overlay").forEach(m => m.remove()); });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") document.querySelectorAll(".modal-overlay").forEach(m => m.remove());
+    });
   },
 
   async loadProfile() {
@@ -73,3 +105,4 @@ const App = {
 };
 
 document.addEventListener("DOMContentLoaded", () => App.init());
+

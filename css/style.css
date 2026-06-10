@@ -17,13 +17,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:transparent!importan
 /* 星系UI */
 #galaxy-ui{position:fixed;inset:0;z-index:10;pointer-events:none}
 #galaxy-ui>*{pointer-events:auto}
-.galaxy-center-btn{padding:14px 32px;border:1px solid rgba(255,255,255,0.1);border-radius:40px;background:rgba(15,22,50,0.3);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);color:rgba(220,235,255,0.9);font-size:1.05em;font-weight:400;letter-spacing:0.06em;cursor:pointer;transition:all 0.4s;display:flex;align-items:center;gap:10px;box-shadow:0 0 30px rgba(80,130,220,0.12)}
-.galaxy-center-btn:hover{background:rgba(25,38,80,0.45);border-color:rgba(160,200,255,0.25);box-shadow:0 0 45px rgba(80,150,255,0.3);transform:translate(-50%,-50%) scale(1.04);color:#fff}
+.galaxy-center-btn{width:56px;height:56px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);background:rgba(15,22,50,0.3);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);color:rgba(220,235,255,0.9);font-size:1.3em;cursor:pointer;transition:all 0.4s;display:flex;align-items:center;justify-content:center;box-shadow:0 0 25px rgba(80,130,220,0.12)}
+.galaxy-center-btn:hover{background:rgba(25,38,80,0.45);border-color:rgba(160,200,255,0.3);box-shadow:0 0 40px rgba(80,150,255,0.35);color:#fff;transform:scale(1.08)}
 .gcb-icon{font-size:1.2em}
 .gcb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,rgba(80,140,240,0.5),rgba(140,70,220,0.5));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;box-shadow:0 0 12px rgba(100,150,255,0.3)}
 .gcb-label{font-size:0.9em;opacity:0.85}
-.galaxy-ring-btn{padding:9px 20px;border:1px solid rgba(255,255,255,0.07);border-radius:22px;background:rgba(15,25,55,0.28);backdrop-filter:blur(12px) saturate(120%);-webkit-backdrop-filter:blur(12px) saturate(120%);color:rgba(200,220,255,0.75);font-size:0.82em;cursor:pointer;transition:all 0.4s;display:flex;align-items:center;gap:7px;white-space:nowrap;letter-spacing:0.04em;box-shadow:0 0 18px rgba(80,130,220,0.08)}
-.galaxy-ring-btn:hover{background:rgba(25,40,85,0.45);border-color:rgba(150,190,255,0.25);color:#fff;box-shadow:0 0 30px rgba(100,160,255,0.3)}
+.galaxy-ring-btn{width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,0.07);background:rgba(15,25,55,0.28);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(200,220,255,0.75);font-size:1.1em;cursor:pointer;transition:all 0.4s;display:flex;align-items:center;justify-content:center;box-shadow:0 0 15px rgba(80,130,220,0.08)}
+.galaxy-ring-btn:hover{background:rgba(25,40,85,0.45);border-color:rgba(150,190,255,0.25);color:#fff;box-shadow:0 0 28px rgba(100,160,255,0.3)}
 .grb-icon{font-size:1.05em}
 .galaxy-logout{border-color:rgba(255,100,120,0.15)}
 .galaxy-logout:hover{box-shadow:0 0 25px rgba(255,100,130,0.2)}
@@ -47,4 +47,21 @@ a{color:var(--cyan);text-decoration:none}a:hover{text-shadow:0 0 10px var(--cyan
 .link{color:var(--cyan);cursor:pointer}.link:hover{color:var(--magenta)}
 .modal-overlay{position:fixed;inset:0;z-index:50;background:rgba(2,4,14,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
 .modal-content{background:rgba(10,16,36,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:500px;width:90vw}
-@media(max-width:768px){.galaxy-ring-btn{padding:7px 14px;font-size:0.75em}.galaxy-center-btn{padding:12px 24px;font-size:0.95em}#app-container{width:94vw;padding:18px 16px;max-height:65vh}}
+@media(max-width:768px){.galaxy-ring-btn{width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,0.07);background:rgba(15,25,55,0.28);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);color:rgba(200,220,255,0.75);font-size:1.1em;cursor:pointer;transition:all 0.4s;display:flex;align-items:center;justify-content:center;box-shadow:0 0 15px rgba(80,130,220,0.08)}.galaxy-center-btn{width:56px;height:56px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);background:rgba(15,22,50,0.3);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%);color:rgba(220,235,255,0.9);font-size:1.3em;cursor:pointer;transition:all 0.4s;display:flex;align-items:center;justify-content:center;box-shadow:0 0 25px rgba(80,130,220,0.12)}#app-container{width:94vw;padding:18px 16px;max-height:65vh}}
+
+/* 按钮上方文字标签 */
+.ring-label{color:rgba(180,200,230,0.65);font-size:11px;letter-spacing:0.08em;font-weight:300;text-shadow:0 0 6px rgba(100,140,240,0.3);white-space:nowrap;pointer-events:none;transition:all 0.3s}
+.galaxy-ring-btn:hover+.ring-label,.galaxy-center-btn:hover+.ring-label,
+div:hover>.ring-label{color:rgba(220,235,255,0.9);text-shadow:0 0 12px rgba(120,160,255,0.6)}
+
+/* 返回按钮特殊样式 */
+.galaxy-back-btn{width:50px;height:50px;font-size:1.2em;border-color:rgba(100,200,255,0.2);box-shadow:0 0 25px rgba(0,180,255,0.15)}
+.galaxy-back-btn:hover{border-color:rgba(100,200,255,0.4);box-shadow:0 0 35px rgba(0,180,255,0.35)}
+
+@media(max-width:768px){
+  .galaxy-center-btn{width:46px;height:46px;font-size:1.1em}
+  .galaxy-ring-btn{width:38px;height:38px;font-size:0.95em}
+  .ring-label{font-size:10px}
+  .galaxy-back-btn{width:42px;height:42px}
+}
+
