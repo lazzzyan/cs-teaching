@@ -1,5 +1,5 @@
 ﻿// Galaxy Engine v8 — 7场景 + GSAP转场
-const CFG = { ROTATE: 30, GRAVITY: 2.0, GLOW: 0.04, SIZE_BASE: 200, SIZE_MAX: 20, TRANS: 1000 };
+const CFG = { ROTATE: 30, GRAVITY: 2.0, GLOW: 0.06, SIZE_BASE: 200, SIZE_MAX: 24, TRANS: 1000 };
 
 class StarfieldEngine {
   constructor(canvas) {
@@ -43,7 +43,7 @@ class StarfieldEngine {
     return { vertex: `
       attribute vec3 aOrig; attribute float aSz; attribute vec3 aCol;
       uniform vec3 uMouse; uniform float uStr; uniform float uTime; uniform float uPR;
-      varying vec3 vCol; varying float vA;
+      varying vec3 vCol; varying float vA; uniform float uGlobalBrightness;
       void main() {
         vec3 p = aOrig;
         p.x += sin(p.z*0.25+uTime*0.35)*0.12; p.z += cos(p.x*0.25+uTime*0.35)*0.12;
@@ -56,11 +56,11 @@ class StarfieldEngine {
         gl_PointSize = clamp(sz,0.3,${M}.0); gl_Position = projectionMatrix*mv;
         vCol = aCol*(1.0+cb*1.5+gv*0.3); vA = 0.85*(1.0+cb*0.5);
       }`, fragment: `
-      varying vec3 vCol; varying float vA;
+      varying vec3 vCol; varying float vA; uniform float uGlobalBrightness;
       void main() {
         float d = length(gl_PointCoord-0.5)*2.0;
         float a = 1.0-smoothstep(0.0,0.5,d); a = pow(a,1.05);
-        float gl = exp(-d*8.0)*${G}; gl_FragColor = vec4(vCol*(1.0+gl),vA*a);
+        float gl = exp(-d*8.0)*${G}; gl_FragColor = vec4(vCol*(1.0+gl),vA*a) * uGlobalBrightness;
       }`
     };
   }
@@ -111,7 +111,7 @@ class StarfieldEngine {
     this.galaxyUniforms = {
       uMouse: { value: new THREE.Vector3(9999, 0, 9999) },
       uStr: { value: 0 }, uTime: { value: 0 },
-      uPR: { value: Math.min(devicePixelRatio, 2) },
+      uPR: { value: Math.min(devicePixelRatio, 2) }, uGlobalBrightness: { value: 1.0 },
     };
     const sh = this.shader();
     this.galaxyPoints = new THREE.Points(geo, new THREE.ShaderMaterial({
@@ -147,10 +147,10 @@ class StarfieldEngine {
       const geo = new THREE.BufferGeometry();
       geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
       geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
-      dna.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.2, map: tex, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      dna.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.5, map: tex, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
       for (let i = 0; i < 40; i++) {
         const t = (i / 40) * Math.PI * 4, y = (t / (Math.PI * 4) - 0.5) * 10, r = 1.5;
-        dna.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-Math.cos(t) * r, y, -Math.sin(t) * r), new THREE.Vector3(Math.cos(t) * r, y, Math.sin(t) * r)]), new THREE.LineBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.3 })));
+        dna.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-Math.cos(t) * r, y, -Math.sin(t) * r), new THREE.Vector3(Math.cos(t) * r, y, Math.sin(t) * r)]), new THREE.LineBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.6 })));
       }
     }
     dna.visible = false; dna.position.set(0, 0, -10); this.scene.add(dna); this.scenes.dna = dna;
@@ -164,7 +164,7 @@ class StarfieldEngine {
       const orbN = 500; const orbPos = new Float32Array(orbN * 3);
       for (let i = 0; i < orbN; i++) { const a = (i / orbN) * Math.PI * 2, r = 3.5 + Math.sin(i * 0.5) * 0.5; orbPos[i * 3] = Math.cos(a) * r; orbPos[i * 3 + 1] = (Math.random() - 0.5) * 0.3; orbPos[i * 3 + 2] = Math.sin(a) * r; }
       const orbGeo = new THREE.BufferGeometry(); orbGeo.setAttribute("position", new THREE.BufferAttribute(orbPos, 3));
-      eng.add(new THREE.Points(orbGeo, new THREE.PointsMaterial({ size: 0.12, map: tex, color: 0x8899ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      eng.add(new THREE.Points(orbGeo, new THREE.PointsMaterial({ size: 0.3, map: tex, color: 0x8899ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
     }
     eng.visible = false; eng.position.set(-8, 3, -10); this.scene.add(eng); this.scenes.engineering = eng;
 
@@ -175,11 +175,11 @@ class StarfieldEngine {
       const pos = new Float32Array(nodes.length * 3);
       nodes.forEach((n, i) => { pos[i * 3] = n.x; pos[i * 3 + 1] = n.y; pos[i * 3 + 2] = n.z; });
       const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-      web.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.16, map: tex, color: 0x9977ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      web.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.4, map: tex, color: 0x9977ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
       for (let i = 0; i < nodes.length; i++)
         for (let j = i + 1; j < nodes.length; j++)
           if (nodes[i].distanceTo(nodes[j]) < 2.0 && Math.random() < 0.08)
-            web.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]), new THREE.LineBasicMaterial({ color: 0x6655cc, transparent: true, opacity: 0.18 })));
+            web.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]), new THREE.LineBasicMaterial({ color: 0x6655cc, transparent: true, opacity: 0.35 })));
     }
     web.visible = false; web.position.set(10, 2, -8); this.scene.add(web); this.scenes.web3 = web;
 
@@ -193,23 +193,23 @@ class StarfieldEngine {
         pos[i * 3] = Math.sin(ph) * Math.cos(th) * r; pos[i * 3 + 1] = Math.sin(ph) * Math.sin(th) * r; pos[i * 3 + 2] = Math.cos(ph) * r;
       }
       const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-      data.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.14, map: tex, color: 0xccaaff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      data.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.35, map: tex, color: 0xccaaff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
     }
     data.visible = false; data.position.set(5, -2, -12); this.scene.add(data); this.scenes.data = data;
 
     // 5. 轨道行星（个人主页）
     const orbit = new THREE.Group();
     {
-      const sphere = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), new THREE.MeshBasicMaterial({ color: 0x5577cc, transparent: true, opacity: 0.3, wireframe: true }));
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), new THREE.MeshBasicMaterial({ color: 0x5577cc, transparent: true, opacity: 0.6, wireframe: true }));
       orbit.add(sphere);
       for (let ring = 0; ring < 3; ring++) {
         const rr = 2.5 + ring * 1.5;
-        const rg = new THREE.Mesh(new THREE.TorusGeometry(rr, 0.03, 16, 80), new THREE.MeshBasicMaterial({ color: ring === 0 ? 0x6699ee : ring === 1 ? 0x8866dd : 0xaa55cc, transparent: true, opacity: 0.35 }));
+        const rg = new THREE.Mesh(new THREE.TorusGeometry(rr, 0.03, 16, 80), new THREE.MeshBasicMaterial({ color: ring === 0 ? 0x6699ee : ring === 1 ? 0x8866dd : 0xaa55cc, transparent: true, opacity: 0.7 }));
         rg.rotation.x = Math.PI * 0.5 + ring * 0.3; rg.rotation.y = ring * 0.5; orbit.add(rg);
         const orbN = 300; const orbPos = new Float32Array(orbN * 3);
         for (let i = 0; i < orbN; i++) { const a = (i / orbN) * Math.PI * 2; orbPos[i * 3] = Math.cos(a) * rr; orbPos[i * 3 + 1] = (Math.random() - 0.5) * 0.2; orbPos[i * 3 + 2] = Math.sin(a) * rr; }
         const oGeo = new THREE.BufferGeometry(); oGeo.setAttribute("position", new THREE.BufferAttribute(orbPos, 3));
-        orbit.add(new THREE.Points(oGeo, new THREE.PointsMaterial({ size: 0.1, map: tex, color: 0x88aaff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+        orbit.add(new THREE.Points(oGeo, new THREE.PointsMaterial({ size: 0.25, map: tex, color: 0x88aaff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
       }
     }
     orbit.visible = false; orbit.position.set(-4, -2, -14); this.scene.add(orbit); this.scenes.orbit = orbit;
@@ -225,11 +225,11 @@ class StarfieldEngine {
         pts.push(new THREE.Vector3(-size / 2, 0, p), new THREE.Vector3(size / 2, 0, p));
       }
       const gGeo = new THREE.BufferGeometry().setFromPoints(pts);
-      grid.add(new THREE.LineSegments(gGeo, new THREE.LineBasicMaterial({ color: 0x3355aa, transparent: true, opacity: 0.3 })));
+      grid.add(new THREE.LineSegments(gGeo, new THREE.LineBasicMaterial({ color: 0x3355aa, transparent: true, opacity: 0.6 })));
       const cubeN = 200; const cubePos = new Float32Array(cubeN * 3);
       for (let i = 0; i < cubeN; i++) { cubePos[i * 3] = (Math.random() - 0.5) * size; cubePos[i * 3 + 1] = Math.random() * 4; cubePos[i * 3 + 2] = (Math.random() - 0.5) * size; }
       const cGeo = new THREE.BufferGeometry(); cGeo.setAttribute("position", new THREE.BufferAttribute(cubePos, 3));
-      grid.add(new THREE.Points(cGeo, new THREE.PointsMaterial({ size: 0.1, map: tex, color: 0x6699dd, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      grid.add(new THREE.Points(cGeo, new THREE.PointsMaterial({ size: 0.25, map: tex, color: 0x6699dd, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
     }
     grid.visible = false; grid.position.set(6, -3, -12); grid.rotation.x = -0.4; this.scene.add(grid); this.scenes.grid = grid;
   }
