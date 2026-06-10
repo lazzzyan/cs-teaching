@@ -82,7 +82,11 @@ const App = {
       if (event === "SIGNED_IN" && session) {
         this.currentUser = session.user;
         await this.loadProfile();
-        Nav.render();
+        if (Router.currentPage === "login" || Router.currentPage === "register") {
+          Router.go("feed");
+        } else {
+          Nav.render();
+        }
       } else if (event === "SIGNED_OUT") {
         this.currentUser = null;
         this.currentProfile = null;
@@ -105,4 +109,5 @@ const App = {
 };
 
 document.addEventListener("DOMContentLoaded", () => App.init());
+
 
