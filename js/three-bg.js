@@ -1,5 +1,5 @@
-﻿// Galaxy Engine v7 — 星系 + 4主题场景 + GSAP转场
-const CFG = { ROTATE: 30, GRAVITY: 2.0, GLOW: 0.04, SIZE_BASE: 200, SIZE_MAX: 20, TRANS_MS: 1000 };
+﻿// Galaxy Engine v8 — 7场景 + GSAP转场
+const CFG = { ROTATE: 30, GRAVITY: 2.0, GLOW: 0.04, SIZE_BASE: 200, SIZE_MAX: 20, TRANS: 1000 };
 
 class StarfieldEngine {
   constructor(canvas) {
@@ -14,15 +14,14 @@ class StarfieldEngine {
     this.camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.5, 200);
     this.camera.position.set(0, 16, 26); this.camera.lookAt(0, 0, 0);
 
-    this.themeGroups = {}; this.activeTheme = "galaxy"; this.state = "galaxy";
+    this.scenes = {}; this.activeScene = "galaxy"; this.state = "galaxy";
     this.mouseWorld = new THREE.Vector3(9999, 0, 9999); this.mouseNdc = new THREE.Vector2();
     this.clock = new THREE.Clock(); this.autoAngle = 0;
-    this.lookProxy = { x: 0, y: 0, z: 0 };
-    this._galaxyBrightness = 1;
+    this.lookProxy = { x: 0, y: 0, z: 0 }; this._brightness = 1;
     this.raycaster = new THREE.Raycaster();
     this.plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-    this.buildGalaxy(); this.buildHalo(); this.buildThemes();
+    this.buildGalaxy(); this.buildHalo(); this.buildAllScenes();
     window.addEventListener("resize", () => this.onResize());
     window.addEventListener("mousemove", e => this.onMouse(e));
     window.addEventListener("mouseleave", () => { this.mouseWorld.set(9999, 0, 9999); });
@@ -73,14 +72,12 @@ class StarfieldEngine {
     const sa = new Float32Array(total), ca = new Float32Array(total * 3);
     let idx = 0;
     const ci = new THREE.Color("#6688ee"), cm = new THREE.Color("#8866dd"), co = new THREE.Color("#5544aa");
-
     function add(x, y, z, s, c) {
       const i3 = idx * 3;
       pa[i3] = oa[i3] = x; pa[i3 + 1] = oa[i3 + 1] = y; pa[i3 + 2] = oa[i3 + 2] = z;
       sa[idx] = s; ca[i3] = c.r; ca[i3 + 1] = c.g; ca[i3 + 2] = c.b; idx++;
     }
     function gr() { let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
-
     for (let arm = 0; arm < A; arm++) {
       const aa = (arm / A) * Math.PI * 2;
       for (let i = 0; i < PA; i++) {
@@ -106,13 +103,11 @@ class StarfieldEngine {
       const a = Math.random() * Math.PI * 2, r = 16 + Math.random() * 22;
       add(Math.cos(a) * r + (Math.random() - 0.5) * 28, (Math.random() - 0.5) * 7, Math.sin(a) * r + (Math.random() - 0.5) * 28, 0.08 + Math.random() * 0.15, new THREE.Color(0.08, 0.1, 0.15 + Math.random() * 0.1));
     }
-
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(pa, 3));
     geo.setAttribute("aOrig", new THREE.BufferAttribute(oa, 3));
     geo.setAttribute("aSz", new THREE.BufferAttribute(sa, 1));
     geo.setAttribute("aCol", new THREE.BufferAttribute(ca, 3));
-
     this.galaxyUniforms = {
       uMouse: { value: new THREE.Vector3(9999, 0, 9999) },
       uStr: { value: 0 }, uTime: { value: 0 },
@@ -136,12 +131,13 @@ class StarfieldEngine {
     p.name = "haloPts"; this.scene.add(p);
   }
 
-  // ==================== 4大主题场景 ====================
-  buildThemes() {
+  // ==================== 7大主题场景 ====================
+  buildAllScenes() {
     const tex = this.tex();
-    // DNA
-    {
-      const g = new THREE.Group(); const n = 800; const pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+
+    // 1. DNA双螺旋
+    const dna = new THREE.Group();
+    { const n = 800; const pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
       for (let i = 0; i < n; i++) {
         const t = (i / n) * Math.PI * 4, s = i % 2 === 0 ? 1 : -1, r = 1.5;
         pos[i * 3] = Math.cos(t) * r * s; pos[i * 3 + 1] = (t / (Math.PI * 4) - 0.5) * 10; pos[i * 3 + 2] = Math.sin(t) * r * s;
@@ -151,42 +147,45 @@ class StarfieldEngine {
       const geo = new THREE.BufferGeometry();
       geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
       geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
-      g.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.2, map: tex, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      dna.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.2, map: tex, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
       for (let i = 0; i < 40; i++) {
         const t = (i / 40) * Math.PI * 4, y = (t / (Math.PI * 4) - 0.5) * 10, r = 1.5;
-        g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-Math.cos(t) * r, y, -Math.sin(t) * r), new THREE.Vector3(Math.cos(t) * r, y, Math.sin(t) * r)]), new THREE.LineBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.3 })));
+        dna.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-Math.cos(t) * r, y, -Math.sin(t) * r), new THREE.Vector3(Math.cos(t) * r, y, Math.sin(t) * r)]), new THREE.LineBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.3 })));
       }
-      g.visible = false; g.position.set(0, 0, -10); this.scene.add(g); this.themeGroups.dna = g;
     }
-    // 工程
+    dna.visible = false; dna.position.set(0, 0, -10); this.scene.add(dna); this.scenes.dna = dna;
+
+    // 2. 工程几何
+    const eng = new THREE.Group();
     {
-      const g = new THREE.Group();
-      g.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.5, 1)), new THREE.LineBasicMaterial({ color: 0x6688cc, transparent: true, opacity: 0.5 })));
+      eng.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.5, 1)), new THREE.LineBasicMaterial({ color: 0x6688cc, transparent: true, opacity: 0.5 })));
       const t = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.TorusGeometry(3, 0.06, 16, 64)), new THREE.LineBasicMaterial({ color: 0x8866dd, transparent: true, opacity: 0.4 }));
-      t.rotation.x = Math.PI * 0.5; g.add(t);
-      const orbN = 500, orbPos = new Float32Array(orbN * 3);
+      t.rotation.x = Math.PI * 0.5; eng.add(t);
+      const orbN = 500; const orbPos = new Float32Array(orbN * 3);
       for (let i = 0; i < orbN; i++) { const a = (i / orbN) * Math.PI * 2, r = 3.5 + Math.sin(i * 0.5) * 0.5; orbPos[i * 3] = Math.cos(a) * r; orbPos[i * 3 + 1] = (Math.random() - 0.5) * 0.3; orbPos[i * 3 + 2] = Math.sin(a) * r; }
       const orbGeo = new THREE.BufferGeometry(); orbGeo.setAttribute("position", new THREE.BufferAttribute(orbPos, 3));
-      g.add(new THREE.Points(orbGeo, new THREE.PointsMaterial({ size: 0.12, map: tex, color: 0x8899ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
-      g.visible = false; g.position.set(-8, 3, -10); this.scene.add(g); this.themeGroups.engineering = g;
+      eng.add(new THREE.Points(orbGeo, new THREE.PointsMaterial({ size: 0.12, map: tex, color: 0x8899ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
     }
-    // WEB3
-    {
-      const g = new THREE.Group(); const nodes = [];
+    eng.visible = false; eng.position.set(-8, 3, -10); this.scene.add(eng); this.scenes.engineering = eng;
+
+    // 3. WEB3网络
+    const web = new THREE.Group();
+    { const nodes = [];
       for (let i = 0; i < 150; i++) nodes.push(new THREE.Vector3((Math.random() - 0.5) * 12, (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 6));
       const pos = new Float32Array(nodes.length * 3);
       nodes.forEach((n, i) => { pos[i * 3] = n.x; pos[i * 3 + 1] = n.y; pos[i * 3 + 2] = n.z; });
       const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-      g.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.16, map: tex, color: 0x9977ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      web.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.16, map: tex, color: 0x9977ee, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
       for (let i = 0; i < nodes.length; i++)
         for (let j = i + 1; j < nodes.length; j++)
           if (nodes[i].distanceTo(nodes[j]) < 2.0 && Math.random() < 0.08)
-            g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]), new THREE.LineBasicMaterial({ color: 0x6655cc, transparent: true, opacity: 0.18 })));
-      g.visible = false; g.position.set(10, 2, -8); this.scene.add(g); this.themeGroups.web3 = g;
+            web.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]), new THREE.LineBasicMaterial({ color: 0x6655cc, transparent: true, opacity: 0.18 })));
     }
-    // 数据
-    {
-      const g = new THREE.Group(); const n = 1000; const pos = new Float32Array(n * 3);
+    web.visible = false; web.position.set(10, 2, -8); this.scene.add(web); this.scenes.web3 = web;
+
+    // 4. 数据星云
+    const data = new THREE.Group();
+    { const n = 1000; const pos = new Float32Array(n * 3);
       for (let i = 0; i < n; i++) {
         const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
         let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random();
@@ -194,57 +193,93 @@ class StarfieldEngine {
         pos[i * 3] = Math.sin(ph) * Math.cos(th) * r; pos[i * 3 + 1] = Math.sin(ph) * Math.sin(th) * r; pos[i * 3 + 2] = Math.cos(ph) * r;
       }
       const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-      g.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.14, map: tex, color: 0xccaaff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
-      g.visible = false; g.position.set(5, -2, -12); this.scene.add(g); this.themeGroups.data = g;
+      data.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.14, map: tex, color: 0xccaaff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
     }
+    data.visible = false; data.position.set(5, -2, -12); this.scene.add(data); this.scenes.data = data;
+
+    // 5. 轨道行星（个人主页）
+    const orbit = new THREE.Group();
+    {
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), new THREE.MeshBasicMaterial({ color: 0x5577cc, transparent: true, opacity: 0.3, wireframe: true }));
+      orbit.add(sphere);
+      for (let ring = 0; ring < 3; ring++) {
+        const rr = 2.5 + ring * 1.5;
+        const rg = new THREE.Mesh(new THREE.TorusGeometry(rr, 0.03, 16, 80), new THREE.MeshBasicMaterial({ color: ring === 0 ? 0x6699ee : ring === 1 ? 0x8866dd : 0xaa55cc, transparent: true, opacity: 0.35 }));
+        rg.rotation.x = Math.PI * 0.5 + ring * 0.3; rg.rotation.y = ring * 0.5; orbit.add(rg);
+        const orbN = 300; const orbPos = new Float32Array(orbN * 3);
+        for (let i = 0; i < orbN; i++) { const a = (i / orbN) * Math.PI * 2; orbPos[i * 3] = Math.cos(a) * rr; orbPos[i * 3 + 1] = (Math.random() - 0.5) * 0.2; orbPos[i * 3 + 2] = Math.sin(a) * rr; }
+        const oGeo = new THREE.BufferGeometry(); oGeo.setAttribute("position", new THREE.BufferAttribute(orbPos, 3));
+        orbit.add(new THREE.Points(oGeo, new THREE.PointsMaterial({ size: 0.1, map: tex, color: 0x88aaff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+      }
+    }
+    orbit.visible = false; orbit.position.set(-4, -2, -14); this.scene.add(orbit); this.scenes.orbit = orbit;
+
+    // 6. 几何网格（管理）
+    const grid = new THREE.Group();
+    {
+      const size = 12, div = 20, step = size / div;
+      const pts = [];
+      for (let i = 0; i <= div; i++) {
+        const p = -size / 2 + i * step;
+        pts.push(new THREE.Vector3(p, 0, -size / 2), new THREE.Vector3(p, 0, size / 2));
+        pts.push(new THREE.Vector3(-size / 2, 0, p), new THREE.Vector3(size / 2, 0, p));
+      }
+      const gGeo = new THREE.BufferGeometry().setFromPoints(pts);
+      grid.add(new THREE.LineSegments(gGeo, new THREE.LineBasicMaterial({ color: 0x3355aa, transparent: true, opacity: 0.3 })));
+      const cubeN = 200; const cubePos = new Float32Array(cubeN * 3);
+      for (let i = 0; i < cubeN; i++) { cubePos[i * 3] = (Math.random() - 0.5) * size; cubePos[i * 3 + 1] = Math.random() * 4; cubePos[i * 3 + 2] = (Math.random() - 0.5) * size; }
+      const cGeo = new THREE.BufferGeometry(); cGeo.setAttribute("position", new THREE.BufferAttribute(cubePos, 3));
+      grid.add(new THREE.Points(cGeo, new THREE.PointsMaterial({ size: 0.1, map: tex, color: 0x6699dd, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
+    }
+    grid.visible = false; grid.position.set(6, -3, -12); grid.rotation.x = -0.4; this.scene.add(grid); this.scenes.grid = grid;
   }
 
-  // ==================== 转场目标 ====================
-  sceneTargets = {
+  // ==================== 场景映射 ====================
+  targets = {
     galaxy: { pos: [0, 16, 26], look: [0, 0, 0] },
     dna: { pos: [0, 0, 6], look: [0, 0, -10] },
     engineering: { pos: [-6, 5, 0], look: [-8, 3, -10] },
     web3: { pos: [12, 4, -2], look: [10, 2, -8] },
     data: { pos: [7, -1, -4], look: [5, -2, -12] },
+    orbit: { pos: [-2, -1, -6], look: [-4, -2, -14] },
+    grid: { pos: [8, 0, -4], look: [6, -3, -12] },
   };
 
-  pageToScene = {
-    upload: "dna", "edit-resource": "dna", admin: "dna", feed: "web3", friends: "engineering", chat: "engineering", profile: "data", search: "data",
-  };
+  pageToScene = { upload: "dna", "edit-resource": "dna", admin: "grid", feed: "web3", friends: "engineering", chat: "engineering", profile: "data", search: "data", };
 
   transitionTo(page, cb) {
     const sn = this.pageToScene[page] || "galaxy";
-    this.activeTheme = sn; this.state = "transitioning";
+    this.activeScene = sn; this.state = "transitioning";
+    Object.values(this.scenes).forEach(g => { g.visible = false; });
 
-    Object.values(this.themeGroups).forEach(g => { g.visible = false; });
     const tgtBright = sn === "galaxy" ? 1.0 : 0.3;
-    gsap.to(this, { _galaxyBrightness: tgtBright, duration: CFG.TRANS_MS / 1000, ease: "power2.out",
-      onUpdate: () => { if (this.galaxyUniforms.uGlobalBrightness) this.galaxyUniforms.uGlobalBrightness.value = this._galaxyBrightness; }
+    gsap.to(this, { _brightness: tgtBright, duration: CFG.TRANS / 1000, ease: "power2.out",
+      onUpdate: () => { if (this.galaxyUniforms.uGlobalBrightness) this.galaxyUniforms.uGlobalBrightness.value = this._brightness; }
     });
 
-    const tgt = this.sceneTargets[sn];
-    gsap.to(this.camera.position, { x: tgt.pos[0], y: tgt.pos[1], z: tgt.pos[2], duration: CFG.TRANS_MS / 1000, ease: "power2.out" });
+    const tgt = this.targets[sn];
+    gsap.to(this.camera.position, { x: tgt.pos[0], y: tgt.pos[1], z: tgt.pos[2], duration: CFG.TRANS / 1000, ease: "power2.out" });
     const fl = { x: this.lookProxy.x, y: this.lookProxy.y, z: this.lookProxy.z };
-    gsap.to(fl, { x: tgt.look[0], y: tgt.look[1], z: tgt.look[2], duration: CFG.TRANS_MS / 1000, ease: "power2.out",
+    gsap.to(fl, { x: tgt.look[0], y: tgt.look[1], z: tgt.look[2], duration: CFG.TRANS / 1000, ease: "power2.out",
       onUpdate: () => { this.camera.lookAt(fl.x, fl.y, fl.z); },
       onComplete: () => {
         this.lookProxy.x = tgt.look[0]; this.lookProxy.y = tgt.look[1]; this.lookProxy.z = tgt.look[2];
-        if (sn !== "galaxy" && this.themeGroups[sn]) this.themeGroups[sn].visible = true;
+        if (sn !== "galaxy" && this.scenes[sn]) this.scenes[sn].visible = true;
         this.state = "theme"; if (cb) cb();
       }
     });
   }
 
   resetToGalaxy(cb) {
-    this.activeTheme = "galaxy"; this.state = "transitioning";
-    Object.values(this.themeGroups).forEach(g => { g.visible = false; });
-    gsap.to(this, { _galaxyBrightness: 1.0, duration: CFG.TRANS_MS / 1000, ease: "power2.out",
-      onUpdate: () => { if (this.galaxyUniforms.uGlobalBrightness) this.galaxyUniforms.uGlobalBrightness.value = this._galaxyBrightness; }
+    this.activeScene = "galaxy"; this.state = "transitioning";
+    Object.values(this.scenes).forEach(g => { g.visible = false; });
+    gsap.to(this, { _brightness: 1.0, duration: CFG.TRANS / 1000, ease: "power2.out",
+      onUpdate: () => { if (this.galaxyUniforms.uGlobalBrightness) this.galaxyUniforms.uGlobalBrightness.value = this._brightness; }
     });
-    const tgt = this.sceneTargets.galaxy;
-    gsap.to(this.camera.position, { x: tgt.pos[0], y: tgt.pos[1], z: tgt.pos[2], duration: CFG.TRANS_MS / 1000, ease: "power2.out" });
+    const tgt = this.targets.galaxy;
+    gsap.to(this.camera.position, { x: tgt.pos[0], y: tgt.pos[1], z: tgt.pos[2], duration: CFG.TRANS / 1000, ease: "power2.out" });
     const fl = { x: this.lookProxy.x, y: this.lookProxy.y, z: this.lookProxy.z };
-    gsap.to(fl, { x: 0, y: 0, z: 0, duration: CFG.TRANS_MS / 1000, ease: "power2.out",
+    gsap.to(fl, { x: 0, y: 0, z: 0, duration: CFG.TRANS / 1000, ease: "power2.out",
       onUpdate: () => { this.camera.lookAt(fl.x, fl.y, fl.z); },
       onComplete: () => {
         this.lookProxy.x = 0; this.lookProxy.y = 0; this.lookProxy.z = 0;
@@ -281,10 +316,13 @@ class StarfieldEngine {
       this.camera.lookAt(0, 0, 0);
     }
 
-    if (this.themeGroups.dna?.visible) this.themeGroups.dna.rotation.y += dt * 0.35;
-    if (this.themeGroups.web3?.visible) this.themeGroups.web3.rotation.y += dt * 0.22;
-    if (this.themeGroups.engineering?.visible) this.themeGroups.engineering.children.forEach((c, i) => { c.rotation.y += dt * 0.25 * (i + 1) * 0.5; c.rotation.x += dt * 0.12 * (i % 2 ? -1 : 1); });
-    if (this.themeGroups.data?.visible) this.themeGroups.data.rotation.y += dt * 0.14;
+    // 各场景独立动画
+    if (this.scenes.dna?.visible) this.scenes.dna.rotation.y += dt * 0.4;
+    if (this.scenes.web3?.visible) this.scenes.web3.rotation.y += dt * 0.22;
+    if (this.scenes.engineering?.visible) this.scenes.engineering.children.forEach((c, i) => { c.rotation.y += dt * 0.25 * (i + 1) * 0.5; c.rotation.x += dt * 0.12 * (i % 2 ? -1 : 1); });
+    if (this.scenes.data?.visible) this.scenes.data.rotation.y += dt * 0.14;
+    if (this.scenes.orbit?.visible) this.scenes.orbit.rotation.y += dt * 0.2;
+    if (this.scenes.grid?.visible) this.scenes.grid.rotation.y += dt * 0.1;
 
     const halo = this.scene.getObjectByName("halo");
     if (halo) halo.rotation.z += dt * 0.025;

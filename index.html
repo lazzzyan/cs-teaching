@@ -1,18 +1,30 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CS教学平台</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/cards.css">
+<link rel="stylesheet" href="css/detail.css">
+<link rel="stylesheet" href="css/social.css">
+<link rel="stylesheet" href="css/upload.css">
+<link rel="stylesheet" href="css/admin.css">
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <canvas id="starfield-canvas"></canvas>
-<div id="cursor-glow"></div>
-<div id="galaxy-ui"></div>
+
+<!-- 左侧栏 -->
+<aside id="sidebar">
+  <div class="sb-header"><span class="sb-logo">CS</span><span class="sb-title">教学平台</span></div>
+  <nav class="sb-nav" id="sb-nav"></nav>
+  <div class="sb-footer" id="sb-footer"></div>
+</aside>
+
+<!-- 内容覆盖层 -->
 <div id="app-overlay"><main id="app-container"></main></div>
 
 <script src="js/config.js"></script>
